@@ -7,7 +7,7 @@ import tensorflow as tf
 
 import configs.deception_default_config as config
 
-from configs.dataset.modality import Modality, DatasetExampleFeature, TimeDependentModality
+from configs.dataset.modality import Modality, DatasetFeature, TimeDependentModality
 from dataset.tf_example_writer import TfExampleWriter
 from utils.dirs import create_dirs
 
@@ -73,8 +73,8 @@ def _process_audio_modality(filename: str, offset: float, duration: float) -> di
     # как передавать дальше? - байты аудио, надо только нарезать по фреймам
     features_by_name = {}
     audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration)
-    features_by_name[DatasetExampleFeature.AUDIO_RAW] = audio_raw
-    features_by_name[DatasetExampleFeature.AUDIO_RATE] = audio_raw_rate
+    features_by_name[DatasetFeature.AUDIO_RAW] = audio_raw
+    features_by_name[DatasetFeature.AUDIO_RATE] = audio_raw_rate
     return features_by_name
 
 
@@ -103,8 +103,8 @@ def _process_video_scene_modality(frames: list, fps, example: str, offset: float
 
     result_list = np.asarray(result_list)
     features_by_name = {
-        DatasetExampleFeature.VIDEO_SCENE_RAW: result_list,
-        DatasetExampleFeature.VIDEO_SHAPE: result_list.shape,
+        DatasetFeature.VIDEO_SCENE_RAW: result_list,
+        DatasetFeature.VIDEO_SHAPE: result_list.shape,
     }
 
     print(
@@ -150,7 +150,7 @@ def _process_video_face_modality(frames: list, fps, example: str, offset: float,
         result_list_resized.append(cv2.resize(frame, (max_face_h, max_face_w)))
 
     features_by_name = {
-        DatasetExampleFeature.VIDEO_FACE_RAW: np.asarray(result_list_resized)
+        DatasetFeature.VIDEO_FACE_RAW: np.asarray(result_list_resized)
     }
 
     if len(result_list_resized) != modality.config.EXTRACTED_FRAMES_COUNT:
@@ -167,7 +167,7 @@ def _encode_example(features_by_name, clazz):
     for modality, feature in features_by_name.items():
         tf_features_dict[str(modality.name)] = modality.encoder.transform(feature)
 
-    tf_features_dict[DatasetExampleFeature.CLASS.name] = DatasetExampleFeature.CLASS.encoder.transform(clazz)
+    tf_features_dict[DatasetFeature.CLASS.name] = DatasetFeature.CLASS.encoder.transform(clazz)
     example = tf.train.Example(features=tf.train.Features(feature=tf_features_dict))
     return example.SerializeToString()
 

@@ -54,7 +54,7 @@ class TensorEncoder(ByteEncoder):
         return super().transform(feature)
 
 
-class DatasetExampleFeature(Enum):
+class DatasetFeature(Enum):
     def __new__(cls, *args, **kwds):
         value = len(cls.__members__) + 1
         obj = object.__new__(cls)
@@ -64,6 +64,7 @@ class DatasetExampleFeature(Enum):
     def __init__(self, encoder):
         self.encoder = encoder
 
+    AUDIO = {}
     AUDIO_RAW = TensorEncoder()
     AUDIO_RATE = IntEncoder()
     VIDEO_SCENE_RAW = TensorEncoder()
