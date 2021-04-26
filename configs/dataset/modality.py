@@ -5,13 +5,13 @@ from abc import ABC, abstractmethod
 
 class TimeDependentModality(ABC):
     WINDOW_STEP_IN_SECS = 1
-    WINDOW_WIDTH_IN_SECS = 5
+    WINDOW_WIDTH_IN_SECS = 15
 
 
 class VideoModalityConfig(TimeDependentModality):
     def __init__(self):
         super().__init__()
-        self.EXTRACTED_FRAMES_COUNT = 5
+        self.EXTRACTED_FRAMES_COUNT = 64
         self.FILE_EXT = '.mp4'
 
 
@@ -68,6 +68,5 @@ class DatasetExampleFeature(Enum):
     AUDIO_RATE = IntEncoder()
     VIDEO_SCENE_RAW = TensorEncoder()
     VIDEO_SHAPE = TensorEncoder()
-    VIDEO_FRAMES = IntEncoder()
     VIDEO_FACE_RAW = TensorEncoder()
     CLASS = TensorEncoder()

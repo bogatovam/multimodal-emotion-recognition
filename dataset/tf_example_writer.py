@@ -29,7 +29,7 @@ class TfExampleWriter:
 
         self._writer.flush()
         self._writer.close()
-        log.info("Writing file: {}\tTime: {}s".format(self._filename, self.end_file_time - self.start_file_time))
+        print("Writing file: {}\tTime: {}s".format(self._filename, self.end_file_time - self.start_file_time))
 
     def _next_file(self):
         self._finish_file()
