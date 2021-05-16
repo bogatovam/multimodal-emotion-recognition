@@ -1,7 +1,7 @@
 import os
 
 import moviepy.editor as mp
-import configs.deception_default_config as config
+import configs.ramas_default_config as config
 
 from configs.dataset.modality import Modality
 from utils.dirs import create_dirs

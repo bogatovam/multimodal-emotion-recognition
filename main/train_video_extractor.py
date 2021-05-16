@@ -9,7 +9,7 @@ from trainers.audio_extractor_trainer import FineTuneTrainer
 
 sys.path.insert(0, './')
 
-import configs.deception_default_config as config
+import configs.ramas_default_config as config
 
 
 def main():

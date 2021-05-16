@@ -36,7 +36,6 @@ class VideoModalityPreprocessor(BaseDatasetProcessor):
             DatasetFeature.OPENSMILE_eGeMAPSv02.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.OPENSMILE_ComParE_2016.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.VIDEO_SCENE_RAW.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.VIDEO_SHAPE.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.VIDEO_FACE_RAW.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.CLASS.name: tf.io.FixedLenFeature([], tf.string)
         }

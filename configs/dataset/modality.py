@@ -5,20 +5,30 @@ from abc import ABC
 
 class TimeDependentModality(ABC):
     WINDOW_STEP_IN_SECS = 1
-    WINDOW_WIDTH_IN_SECS = 15
+    WINDOW_WIDTH_IN_SECS = 5
 
 
 class VideoModalityConfig(TimeDependentModality):
     def __init__(self):
         super().__init__()
+        self.FRAMES_PERIOD = 5
+        self.SHAPE = 224
         self.EXTRACTED_FRAMES_COUNT = 64
-        self.FILE_EXT = '.mp4'
+        self.FILE_EXT = '_Video.mp4'
+
+
+class VideoSceneModalityConfig(VideoModalityConfig):
+    def __init__(self):
+        super().__init__()
+        self.SHAPE = 224
+        self.EXTRACTED_FRAMES_COUNT = 64
+        self.FILE_EXT = '_web.mp4'
 
 
 class AudioModalityConfig(TimeDependentModality):
     def __init__(self):
         super().__init__()
-        self.FILE_EXT = '.wav'
+        self.FILE_EXT = '_mic.wav'
 
 
 class Modality(Enum):
@@ -33,7 +43,7 @@ class Modality(Enum):
 
     AUDIO = AudioModalityConfig()
     VIDEO_FACE = VideoModalityConfig()
-    VIDEO_SCENE = VideoModalityConfig()
+    VIDEO_SCENE = VideoSceneModalityConfig()
     SHIMMERS = TimeDependentModality()
     KINECT_SKELETON = TimeDependentModality()
 
@@ -65,10 +75,6 @@ class DatasetFeature(Enum):
         self.encoder = encoder
 
     L3 = TensorEncoder()
-    OPENSMILE_GeMAPSv01b = TensorEncoder()
-    OPENSMILE_eGeMAPSv02 = TensorEncoder()
-    OPENSMILE_ComParE_2016 = TensorEncoder()
     VIDEO_SCENE_RAW = TensorEncoder()
-    VIDEO_SHAPE = TensorEncoder()
     VIDEO_FACE_RAW = TensorEncoder()
     CLASS = TensorEncoder()
