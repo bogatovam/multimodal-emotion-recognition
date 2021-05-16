@@ -21,20 +21,12 @@ class VideoFeatureExtractor(Enum):
 
 class VideoModalityPreprocessor(BaseDatasetProcessor):
 
-    def __init__(self, extractor: VideoFeatureExtractor,
-                 center: bool = True,
-                 target_sr: int = 48000):
+    def __init__(self, extractor: VideoFeatureExtractor):
         self._extractor = extractor
         self.output_shape = extractor.output_shape
 
-        self._center = center
-        self._target_sr = target_sr
-
         self._feature_description = {
             DatasetFeature.L3.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.OPENSMILE_GeMAPSv01b.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.OPENSMILE_eGeMAPSv02.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.OPENSMILE_ComParE_2016.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.VIDEO_SCENE_RAW.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.VIDEO_FACE_RAW.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeature.CLASS.name: tf.io.FixedLenFeature([], tf.string)

@@ -11,7 +11,7 @@ DATASET_PATH = "E:/RAMAS/RAMAS"
 DATASET_TF_RECORDS_PATH = "E:/RAMAS/tf-records"
 
 MODALITY_TO_DATA: dict = {
-    # Modality.AUDIO: DATASET_PATH + "/Data/Audio",
+    Modality.AUDIO: DATASET_PATH + "/Data/Audio",
     # Modality.SHIMMERS: DATASET_PATH + "/Data/Shimmers",
     Modality.VIDEO_SCENE: DATASET_PATH + "/Data/Video_web",
     Modality.VIDEO_FACE: DATASET_PATH + "/Data/Video_close",
