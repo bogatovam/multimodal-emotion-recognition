@@ -1,6 +1,6 @@
-from enum import Enum, auto
+from enum import Enum
 import tensorflow as tf
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class TimeDependentModality(ABC):
@@ -64,9 +64,10 @@ class DatasetFeature(Enum):
     def __init__(self, encoder):
         self.encoder = encoder
 
-    AUDIO = {}
-    AUDIO_RAW = TensorEncoder()
-    AUDIO_RATE = IntEncoder()
+    L3 = TensorEncoder()
+    OPENSMILE_GeMAPSv01b = TensorEncoder()
+    OPENSMILE_eGeMAPSv02 = TensorEncoder()
+    OPENSMILE_ComParE_2016 = TensorEncoder()
     VIDEO_SCENE_RAW = TensorEncoder()
     VIDEO_SHAPE = TensorEncoder()
     VIDEO_FACE_RAW = TensorEncoder()

@@ -1,8 +1,12 @@
 import math
 import os
+from numbers import Real
+
 import cv2
 import numpy as np
 import librosa as lb
+import opensmile
+import resampy
 import tensorflow as tf
 
 import configs.deception_default_config as config
@@ -11,7 +15,7 @@ from configs.dataset.modality import Modality, DatasetFeature, TimeDependentModa
 from dataset.tf_example_writer import TfExampleWriter
 from utils.dirs import create_dirs
 
-face_cascade = cv2.CascadeClassifier('../models/haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier('../models/pretrained/haarcascade_frontalface_default.xml')
 face_cords_hist = {}
 
 
@@ -67,14 +71,92 @@ def _process_face_on_frame(example: str, frame: np.ndarray, max_face_h, max_face
         return np.zeros((max_face_h, max_face_w, 3))
 
 
+def _extract_opensmile_features(audio, sr, features_set):
+    smile = opensmile.Smile(
+        feature_set=features_set,
+        feature_level=opensmile.FeatureLevel.Functionals,
+    )
+
+    return smile.process_signal(audio, sr)
+
+
+def _center_audio(audio, frame_len):
+    """Center audio so that first sample will occur in the middle of the first frame"""
+    return np.pad(audio, (int(frame_len / 2.0), 0), mode='constant', constant_values=0)
+
+
+def _pad_audio(audio, frame_len, hop_len):
+    """Pad audio if necessary so that all samples are processed"""
+    audio_len = audio.size
+    if audio_len < frame_len:
+        pad_length = frame_len - audio_len
+    else:
+        pad_length = int(np.ceil((audio_len - frame_len) / float(hop_len))) * hop_len \
+                     - (audio_len - frame_len)
+
+    if pad_length > 0:
+        audio = np.pad(audio, (0, pad_length), mode='constant', constant_values=0)
+
+    return audio
+
+
+def _l3_preprocess_audio(audio, sr, target_sr: int = 48000, center=True, hop_size=0.1):
+    if audio.size == 0:
+        raise RuntimeError('Got empty audio')
+
+    # Warn user if audio is all zero
+    if np.all(audio == 0):
+        print('[WARN] Provided audio is all zeros')
+
+    # Check audio array dimension
+    if audio.ndim > 2:
+        raise RuntimeError('Audio array can only be be 1D or 2D')
+
+    elif audio.ndim == 2:
+        # Downmix if multichannel
+        audio = np.mean(audio, axis=1)
+
+    if not isinstance(sr, Real) or sr <= 0:
+        raise RuntimeError('Invalid sample rate {}'.format(sr))
+
+    # Resample if necessary
+    if sr != target_sr:
+        audio = resampy.resample(audio, sr_orig=sr, sr_new=target_sr, filter='kaiser_best')
+
+    audio_len = audio.size
+    frame_len = target_sr
+    hop_len = int(hop_size * target_sr)
+
+    if audio_len < frame_len:
+        print('[WARN] Duration of provided audio is shorter than window size (1 second). Audio will be padded.')
+
+    if center:
+        # Center audio
+        audio = _center_audio(audio, frame_len)
+
+    # Pad if necessary to ensure that we process all samples
+    audio = _pad_audio(audio, frame_len, hop_len)
+
+    # Split audio into frames, copied from librosa.util.frame
+    n_frames = 1 + int((len(audio) - frame_len) / float(hop_len))
+    x = np.lib.stride_tricks.as_strided(audio, shape=(frame_len, n_frames),
+                                        strides=(audio.itemsize, hop_len * audio.itemsize)).T
+
+    # Add a channel dimension
+    x = x.reshape((x.shape[0], 1, x.shape[-1]))
+    return x
+
+
 def _process_audio_modality(filename: str, offset: float, duration: float) -> dict:
-    # почистить данные от шума
-    # попробовать выделить тлоько самый сильный голос - это все дальше, здесь только вытаскивание данных
-    # как передавать дальше? - байты аудио, надо только нарезать по фреймам
     features_by_name = {}
     audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration)
-    features_by_name[DatasetFeature.AUDIO_RAW] = audio_raw
-    features_by_name[DatasetFeature.AUDIO_RATE] = audio_raw_rate
+    features_by_name[DatasetFeature.L3] = _l3_preprocess_audio(audio_raw, audio_raw_rate)
+    features_by_name[DatasetFeature.OPENSMILE_GeMAPSv01b] = _extract_opensmile_features(audio_raw, audio_raw_rate,
+                                                                                        opensmile.FeatureSet.GeMAPSv01b)
+    features_by_name[DatasetFeature.OPENSMILE_eGeMAPSv02] = _extract_opensmile_features(audio_raw, audio_raw_rate,
+                                                                                        opensmile.FeatureSet.eGeMAPSv02)
+    features_by_name[DatasetFeature.OPENSMILE_ComParE_2016] = _extract_opensmile_features(audio_raw, audio_raw_rate,
+                                                                                          opensmile.FeatureSet.ComParE_2016)
     return features_by_name
 
 

@@ -3,4 +3,7 @@ tensorflow==2.4.1
 
 librosa~=0.8.0
 opencv-python~=4.5.1.48
-tqdm~=4.60.0
+SoundFile~=0.10.3.post1
+resampy~=0.2.2
+kapre~=0.1.4
+opensmile~=2.0.0

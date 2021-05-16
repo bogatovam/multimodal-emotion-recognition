@@ -74,10 +74,12 @@ def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.1):
     # Pad if necessary to ensure that we process all samples
     audio = _pad_audio(audio, frame_len, hop_len)
 
+    print(audio.shape)
+
     # Split audio into frames, copied from librosa.util.frame
-    n_frames = 1 + int((len(audio) - frame_len) / float(hop_len))
+    n_frames = 1
     x = np.lib.stride_tricks.as_strided(audio, shape=(frame_len, n_frames),
-                                        strides=(audio.itemsize, hop_len * audio.itemsize)).T
+                                        strides=(audio.itemsize, audio.itemsize)).T
 
     # Add a channel dimension
     x = x.reshape((x.shape[0], 1, x.shape[-1]))
@@ -86,11 +88,8 @@ def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.1):
 
 if __name__ == "__main__":
     new_model = tf.keras.models.load_model(
-        'D:/2021/hse/multimodal-emotion-recognition/models/openl3_audio_mel256_music.h5',
-        custom_objects={'Melspectrogram': Melspectrogram}, compile=False)
+        '../models/pretrained/c3d.h5', compile=False)
 
     # Show the model architecture
+    new_model.trainable = False
     new_model.summary()
-
-    audio_, sr_ = sf.read('test.wav')
-    print(new_model.predict(_preprocess_audio_batch(audio_, sr_)).shape)

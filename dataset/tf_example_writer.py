@@ -2,7 +2,6 @@ import os
 import time
 
 import tensorflow as tf
-import logging as log
 
 
 class TfExampleWriter:
