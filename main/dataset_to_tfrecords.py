@@ -1,3 +1,4 @@
+import gc
 import math
 import os
 from numbers import Real
@@ -190,7 +191,7 @@ def _process_video_scene_modality(frames: list, fps, example: str, offset: float
         result_list_resized.append(cv2.resize(frame, (modality.config.SHAPE, modality.config.SHAPE)))
 
     features_by_name = {
-        DatasetFeature.VIDEO_FACE_RAW: np.asarray(result_list_resized)
+        DatasetFeature.VIDEO_SCENE_RAW: np.asarray(result_list_resized)
     }
 
     print(
@@ -259,9 +260,6 @@ def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder
     with TfExampleWriter(name, tf_dataset_path, samples_per_tfrecord) as writer:
         j = 1
         for file_name, annotations_list in config.ANNOTATIONS:
-            scene_video_frames, scene_video_fps = None, 0
-            face_video_frames, face_video_fps = None, 0
-
             for emotion in annotations_list:
 
                 print("\n[INFO][{}] Example [{}/{}]: duration:={}, classes:={}"
@@ -277,17 +275,16 @@ def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder
                         features_by_name.update(
                             _process_audio_modality(filename, offset, emotion.duration))
                     elif modality == Modality.VIDEO_SCENE:
-                        if not scene_video_frames:
-                            scene_video_frames, scene_video_fps = _open_video(filename)
+                        scene_video_frames, scene_video_fps = _open_video(filename)
                         features_by_name.update(
                             _process_video_scene_modality(scene_video_frames, scene_video_fps, file_name, offset,
                                                           duration, modality))
                     elif modality == Modality.VIDEO_FACE:
-                        if not face_video_frames:
-                            face_video_frames, face_video_fps = _open_video(filename)
+                        face_video_frames, face_video_fps = _open_video(filename)
                         features_by_name.update(
                             _process_video_face_modality(face_video_frames, face_video_fps, file_name, offset,
                                                          duration, modality))
+                    gc.collect()
                 writer.write(_encode_example(features_by_name, emotion.emotions_vector))
                 j += 1
 

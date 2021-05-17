@@ -4,7 +4,7 @@ from base.base_model import BaseModel
 import tensorflow as tf
 
 from dataset.preprocessor.audio_modality_preprocessor import AudioFeatureExtractor
-from dataset.preprocessor.video_modality_preprocessor import VideoFeatureExtractor
+from dataset.preprocessor.ft_video_modality_preprocessor import VideoFeatureExtractor
 
 
 class FineTuneModel(BaseModel):
@@ -63,7 +63,8 @@ class FineTuneModel(BaseModel):
 
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(units=self._first_layer_num_neurons, activation=self._activation)(x)
-        output_tensor = tf.keras.layers.Dense(units=1, activation='sigmoid')(x)
+        # todo 9
+        output_tensor = tf.keras.layers.Dense(units=9, activation='sigmoid')(x)
 
         model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)
         model.summary()

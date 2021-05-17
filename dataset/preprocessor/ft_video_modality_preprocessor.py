@@ -36,7 +36,8 @@ class FineTuneVideoModalityPreprocessor(BaseDatasetProcessor):
         dataset = dataset.map(self.map_record_to_dictionary_of_tensors, num_parallel_calls=parallel_calls)
         if self._extractor == VideoFeatureExtractor.C3D:
             dataset = dataset.flat_map(self._C3D_preprocess_frames)
-        dataset = dataset.map(self.concat_with_labels, num_parallel_calls=parallel_calls)
+        else:
+            dataset = dataset.map(self.concat_with_labels, num_parallel_calls=parallel_calls)
         return dataset
 
     @tf.function

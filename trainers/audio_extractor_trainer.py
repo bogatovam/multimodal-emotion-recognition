@@ -32,8 +32,7 @@ class FineTuneTrainer(BaseTrain):
         train_model = self.model.get_train_model()
 
         callbacks = [*self.model.get_model_callbacks(),
-                     self._get_terminate_on_nan_callback(),
-                     *Logger.get_logger_callbacks(self._board_path, self._log_freq, self._create_dirs_flag)]
+                     self._get_terminate_on_nan_callback()]
 
         history = train_model.fit(
             training_dataset,
