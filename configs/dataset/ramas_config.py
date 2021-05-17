@@ -9,6 +9,7 @@ from configs.dataset.modality import Modality
 DATASET_NAME = "RAMAS"
 DATASET_PATH = "E:/RAMAS/RAMAS"
 DATASET_TF_RECORDS_PATH = "D:/2021/hse/tfrecords"
+# DATASET_TF_RECORDS_PATH = "/content/drive/MyDrive/tfrecords"
 
 MODALITY_TO_DATA: dict = {
     Modality.AUDIO: DATASET_PATH + "/Data/Audio",
@@ -19,6 +20,7 @@ MODALITY_TO_DATA: dict = {
 }
 
 ANNOTATIONS_FILE = "D:/2021/hse/course-work/annotationsClass.csv"
+# ANNOTATIONS_FILE = "/content/drive/MyDrive/RAMAS/annotationsClass.csv"
 
 classes = ["Angry", "Sad", "Disgusted", "Happy", "Scared", "Surprised", "Neutral", "Shame", "Tiredness"]
 
