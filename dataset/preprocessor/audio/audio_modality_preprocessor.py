@@ -1,26 +1,8 @@
-from enum import Enum
-
 import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from configs.dataset.modality import DatasetFeature, TimeDependentModality
-
-
-class AudioFeatureExtractor(Enum):
-    def __new__(cls, *args, **kwds):
-        value = len(cls.__members__) + 1
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, *output_shape):
-        self.output_shape = output_shape
-
-    # L3 = (46, 32, 24, 512),
-    L3 = (1, 48000)  # just after net preprocessor
-    OPENSMILE_GeMAPSv01b = (1, 62)
-    OPENSMILE_eGeMAPSv02 = (1, 88)
-    OPENSMILE_ComParE_2016 = (1, 6373)
+from dataset.preprocessor.feature_extractors_metadata import AudioFeatureExtractor
 
 
 class AudioModalityPreprocessor(BaseDatasetProcessor):

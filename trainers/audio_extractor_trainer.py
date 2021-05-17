@@ -1,13 +1,12 @@
 from base.base_train import BaseTrain
 from dataset.manager.data_manager import DataManager
-from models.audio.audio_extractor_model import FineTuneModel
 from utils.logger import Logger
 
 
-class FineTuneTrainer(BaseTrain):
+class SimpleTrainer(BaseTrain):
 
     def __init__(self,
-                 model: FineTuneModel,
+                 model,
                  data: DataManager,
                  board_path: str,
                  log_freq: int,
@@ -23,7 +22,7 @@ class FineTuneTrainer(BaseTrain):
         self._num_iter_per_epoch = num_iter_per_epoch
         self._validation_steps = validation_steps
         self._create_dirs_flag = create_dirs_flag
-        super(FineTuneTrainer, self).__init__(model, data)
+        super(SimpleTrainer, self).__init__(model, data)
 
     def train(self):
         training_dataset = self.data.build_training_dataset()
@@ -32,7 +31,8 @@ class FineTuneTrainer(BaseTrain):
         train_model = self.model.get_train_model()
 
         callbacks = [*self.model.get_model_callbacks(),
-                     self._get_terminate_on_nan_callback()]
+                     self._get_terminate_on_nan_callback(),
+                     *Logger.get_logger_callbacks(self._board_path, self._log_freq, self._create_dirs_flag)]
 
         history = train_model.fit(
             training_dataset,

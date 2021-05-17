@@ -3,8 +3,8 @@ from kapre.time_frequency import Melspectrogram
 from base.base_model import BaseModel
 import tensorflow as tf
 
-from dataset.preprocessor.audio_modality_preprocessor import AudioFeatureExtractor
-from dataset.preprocessor.ft_video_modality_preprocessor import VideoFeatureExtractor
+from dataset.preprocessor.audio.audio_modality_preprocessor import AudioFeatureExtractor
+from dataset.preprocessor.face.ft_video_modality_preprocessor import VideoFeatureExtractor
 
 
 class FineTuneModel(BaseModel):

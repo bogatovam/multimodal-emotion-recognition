@@ -2,9 +2,9 @@ import os
 import sys
 
 from dataset.manager.data_manager import DataManager
-from dataset.preprocessor.ft_video_modality_preprocessor import FineTuneVideoModalityPreprocessor, VideoFeatureExtractor
+from dataset.preprocessor.face.ft_video_modality_preprocessor import FineTuneVideoModalityPreprocessor, VideoFeatureExtractor
 from models.audio.audio_extractor_model import FineTuneModel
-from trainers.audio_extractor_trainer import FineTuneTrainer
+from trainers.audio_extractor_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
 
@@ -30,7 +30,7 @@ def main():
 
     model.load()
 
-    trainer = FineTuneTrainer(
+    trainer = SimpleTrainer(
         model=model,
         data=data_manager,
         board_path=config.TENSORBOARD_DIR,

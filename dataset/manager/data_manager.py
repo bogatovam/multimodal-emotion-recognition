@@ -36,9 +36,6 @@ class DataManager:
         self._test_size = int(0.10 * self._ds_size)
         self._train_size = int(0.7 * self._ds_size)
 
-        self._ds = self._dataset_processor.pre_process(self._ds, self.PARALLEL_CALLS)
-        self._ds = self._ds.shuffle(self._ds_size//6, reshuffle_each_iteration=True)
-
         self._train_ds = self._test_ds = self._val_ds = None
 
     def build_training_dataset(self) -> tf.data.Dataset:
@@ -57,19 +54,18 @@ class DataManager:
         return self._preprocess_dataset(self._val_ds)
 
     def _preprocess_dataset(self, ds: tf.data.Dataset, ) -> tf.data.Dataset:
-        # todo
-        # ds = self._dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
+        ds = self._dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
         if self._use_cache:
             ds = ds.cache()
 
-        ds = ds.batch(self._batch_size)
+        # ds = ds.batch(self._batch_size)
 
         if self._repeat:
             ds = ds.repeat(self._repeat)
         else:
             ds = ds.repeat()
 
-        if self._use_prefetch:
-            ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+        # if self._use_prefetch:
+        #     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
 
         return ds

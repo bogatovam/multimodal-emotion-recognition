@@ -4,19 +4,7 @@ import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from configs.dataset.modality import DatasetFeature, TimeDependentModality
-
-
-class VideoFeatureExtractor(Enum):
-    def __new__(cls, *args, **kwds):
-        value = len(cls.__members__) + 1
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, *output_shape):
-        self.output_shape = output_shape
-
-    C3D = (32, 112, 112, 3)
+from dataset.preprocessor.feature_extractors_metadata import VideoFeatureExtractor
 
 
 class FineTuneVideoModalityPreprocessor(BaseDatasetProcessor):
@@ -36,7 +24,8 @@ class FineTuneVideoModalityPreprocessor(BaseDatasetProcessor):
         dataset = dataset.map(self.map_record_to_dictionary_of_tensors, num_parallel_calls=parallel_calls)
         if self._extractor == VideoFeatureExtractor.C3D:
             dataset = dataset.flat_map(self._C3D_preprocess_frames)
-        dataset = dataset.map(self.concat_with_labels, num_parallel_calls=parallel_calls)
+        else:
+            dataset = dataset.map(self.concat_with_labels, num_parallel_calls=parallel_calls)
         return dataset
 
     @tf.function

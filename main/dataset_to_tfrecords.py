@@ -1,4 +1,3 @@
-import gc
 import math
 import os
 from numbers import Real
@@ -7,17 +6,18 @@ import cv2
 import numpy as np
 import librosa as lb
 import opensmile
-import resampy
 import tensorflow as tf
+from mtcnn import MTCNN
 
 import configs.ramas_default_config as config
 
-from configs.dataset.modality import Modality, DatasetFeature, TimeDependentModality
+from configs.dataset.modality import Modality, DatasetFeature
 from dataset.tf_example_writer import TfExampleWriter
 from utils.dirs import create_dirs
 
-face_cascade = cv2.CascadeClassifier('../models/pretrained/haarcascade_frontalface_default.xml')
 face_cords_hist = {}
+
+detector = MTCNN()
 
 
 def _open_video(filename: str) -> tuple:
@@ -36,6 +36,7 @@ def _open_video(filename: str) -> tuple:
             if not cap.isOpened():
                 cap.release()
                 print("[ERROR][TF RECORDS BUILDING][VIDEO FACE] It's impossible to open file '{}'".format(filename))
+                raise RuntimeError
 
     fps = cap.get(cv2.CAP_PROP_FPS)
 
@@ -44,7 +45,7 @@ def _open_video(filename: str) -> tuple:
         read, frame = cap.read()
         if not read:
             break
-        example_frames.append(frame)
+        example_frames.append(cv2.resize(frame, (1024, 1024)))
 
     cap.release()
     return example_frames, fps
@@ -61,20 +62,22 @@ def _select_face(frame, face):
 
 
 def _process_face_on_frame(example: str, frame: np.ndarray, max_face_h, max_face_w):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+    faces = detector.detect_faces(frame)
+
     if len(faces) == 1:
-        frame = _select_face(frame, faces[0])
-        face_cords_hist[example] = [faces[0][0], faces[0][1], faces[0][2], faces[0][3]]
+        face = faces[0]['box']
+        frame = _select_face(frame, face)
+        face_cords_hist[example] = [face[0], face[1], face[2], face[3]]
         return frame
     elif len(faces) > 1:
         face_size = 0
+        current_face = faces[0]['box']
         nearest_face = None
         for face in faces:
-            current_face_size = faces[0][2] * faces[0][3]
+            current_face_size = current_face[2] * current_face[3]
             if current_face_size > face_size:
                 face_size = current_face_size
-                nearest_face = face
+                nearest_face = face['box']
         return _select_face(frame, nearest_face)
     elif face_cords_hist.get(example) and len(face_cords_hist.get(example)) != 0:
         return _select_face(frame, face_cords_hist.get(example))
@@ -111,7 +114,7 @@ def _pad_audio(audio, frame_len, hop_len):
     return audio
 
 
-def _l3_preprocess_audio(audio, sr, target_sr: int = 48000, center=True, hop_size=0.1):
+def _l3_preprocess_audio(audio, sr, hop_size=1):
     if audio.size == 0:
         raise RuntimeError('Got empty audio')
 
@@ -130,23 +133,12 @@ def _l3_preprocess_audio(audio, sr, target_sr: int = 48000, center=True, hop_siz
     if not isinstance(sr, Real) or sr <= 0:
         raise RuntimeError('Invalid sample rate {}'.format(sr))
 
-    # Resample if necessary
-    if sr != target_sr:
-        audio = resampy.resample(audio, sr_orig=sr, sr_new=target_sr, filter='kaiser_best')
-
     audio_len = audio.size
-    frame_len = target_sr
-    hop_len = int(hop_size * target_sr)
+    frame_len = sr
+    hop_len = int(hop_size * sr)
 
     if audio_len < frame_len:
         print('[WARN] Duration of provided audio is shorter than window size (1 second). Audio will be padded.')
-
-    if center:
-        # Center audio
-        audio = _center_audio(audio, frame_len)
-
-    # Pad if necessary to ensure that we process all samples
-    audio = _pad_audio(audio, frame_len, hop_len)
 
     # Split audio into frames, copied from librosa.util.frame
     n_frames = 1 + int((len(audio) - frame_len) / float(hop_len))
@@ -158,9 +150,9 @@ def _l3_preprocess_audio(audio, sr, target_sr: int = 48000, center=True, hop_siz
     return x
 
 
-def _process_audio_modality(filename: str, offset: float, duration: float) -> dict:
+def _process_audio_modality(filename: str, offset: float, duration: float, modality) -> dict:
     features_by_name = {}
-    audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration)
+    audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration, sr=modality.config.SR)
     features_by_name[DatasetFeature.L3] = _l3_preprocess_audio(audio_raw, audio_raw_rate)
     print("[INFO][{}][Audio] Complete audio: shape:={}".format(os.path.basename(filename),
                                                                features_by_name[DatasetFeature.L3].shape))
@@ -187,7 +179,7 @@ def _process_video_scene_modality(frames: list, fps, example: str, offset: float
 
     print("[INFO][{}][VIDEO SCENE] frames_period:={}, period_res:={}".format(example, frames_period, period_res))
 
-    # to get N frames from the video we extract frames with period and then randomly add
+    # to get N frames from the face we extract frames with period and then randomly add
     counter_1 = 0
     result_list = []
     for i in range(example_total_frames):
@@ -210,8 +202,8 @@ def _process_video_scene_modality(frames: list, fps, example: str, offset: float
     }
 
     print(
-        "[INFO][{}][VIDEO SCENE] Complete video scene processing: frames_count:={}".format(os.path.basename(example),
-                                                                                           len(result_list)))
+        "[INFO][{}][VIDEO SCENE] Complete face scene processing: frames_count:={}".format(os.path.basename(example),
+                                                                                          len(result_list)))
     return features_by_name
 
 
@@ -234,7 +226,7 @@ def _process_video_face_modality(frames: list, fps, example: str, offset: float,
     period_res = source_frames_count - (math.ceil(example_total_frames / frames_period))
 
     print("[INFO][{}][VIDEO FACE] frames_period:={}".format(example, frames_period))
-    # to get N frames from the video we extract frames with period and then randomly add
+    # to get N frames from the face we extract frames with period and then randomly add
 
     max_face_h = 1
     max_face_w = 1
@@ -264,10 +256,6 @@ def _process_video_face_modality(frames: list, fps, example: str, offset: float,
     features_by_name = {
         DatasetFeature.VIDEO_FACE_RAW: np.asarray(result_list_resized)
     }
-
-    print(
-        "[INFO][{}][VIDEO FACE] Complete video face processing: frames_count:={}".format(os.path.basename(example),
-                                                                                         len(result_list_resized)))
     return features_by_name
 
 
@@ -289,38 +277,37 @@ def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder
     with TfExampleWriter(name, tf_dataset_path, samples_per_tfrecord) as writer:
         j = 1
         for file_name, annotations_list in config.ANNOTATIONS:
-            try:
-                for emotion in annotations_list:
+            scene_video_frames, scene_video_fps = None, 0
+            face_video_frames, face_video_fps = None, 0
+            for emotion in annotations_list:
 
-                    print("\n[INFO][{}] Example [{}/{}]: duration:={}, classes:={}"
-                          .format(file_name, j, config.TARGET_DATASET_LENGTH, emotion.duration,
-                                  emotion.emotions_vector))
+                print("\n[INFO][{}] Example [{}/{}]: duration:={}, classes:={}"
+                      .format(file_name, j, config.TARGET_DATASET_LENGTH, emotion.duration,
+                              emotion.emotions_vector))
 
-                    offset = emotion.offset
-                    duration = emotion.duration
+                offset = emotion.offset
+                duration = emotion.duration
 
-                    features_by_name = {}
-                    for modality, data_path in modality_to_data.items():
-                        filename = os.path.join(data_path, file_name) + modality.config.FILE_EXT
-                        if modality == Modality.AUDIO:
-                            features_by_name.update(
-                                _process_audio_modality(filename, offset, emotion.duration))
-                        elif modality == Modality.VIDEO_SCENE:
+                features_by_name = {}
+                for modality, data_path in modality_to_data.items():
+                    filename = os.path.join(data_path, file_name) + modality.config.FILE_EXT
+                    if modality == Modality.AUDIO:
+                        features_by_name.update(
+                            _process_audio_modality(filename, offset, emotion.duration, modality))
+                    elif modality == Modality.VIDEO_SCENE:
+                        if not scene_video_frames:
                             scene_video_frames, scene_video_fps = _open_video(filename)
-                            features_by_name.update(
-                                _process_video_scene_modality(scene_video_frames, scene_video_fps, file_name, offset,
-                                                              duration, modality))
-                        elif modality == Modality.VIDEO_FACE:
+                        features_by_name.update(
+                            _process_video_scene_modality(scene_video_frames, scene_video_fps, file_name, offset,
+                                                          duration, modality))
+                    elif modality == Modality.VIDEO_FACE:
+                        if not face_video_frames:
                             face_video_frames, face_video_fps = _open_video(filename)
-                            features_by_name.update(
-                                _process_video_face_modality(face_video_frames, face_video_fps, file_name, offset,
-                                                             duration, modality))
-                        gc.collect()
-                    writer.write(_encode_example(features_by_name, emotion.emotions_vector))
-                    j += 1
-            except:
+                        features_by_name.update(
+                            _process_video_face_modality(face_video_frames, face_video_fps, file_name, offset,
+                                                         duration, modality))
+                writer.write(_encode_example(features_by_name, emotion.emotions_vector))
                 j += 1
-                continue
 
 
 if __name__ == "__main__":

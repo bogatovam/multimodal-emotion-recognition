@@ -11,10 +11,10 @@ if __name__ == '__main__':
     #
     # onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
     #
-    # # Import everything needed to edit video clips
+    # # Import everything needed to edit face clips
     # for f in onlyfiles:
     #     print(f)
-    #     # loading video gfg
+    #     # loading face gfg
     #     clip = VideoFileClip(path + "/" + f)
     #     # # rotating clip by 180 degree
     #     out = clip.fx(vfx.mirror_y)
