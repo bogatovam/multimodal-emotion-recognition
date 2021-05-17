@@ -13,21 +13,20 @@ class VideoModalityConfig(TimeDependentModality):
         super().__init__()
         self.FRAMES_PERIOD = 5
         self.SHAPE = 224
-        self.EXTRACTED_FRAMES_COUNT = 64
+        self.FPS = 32
         self.FILE_EXT = '_Video.mp4'
 
 
 class VideoSceneModalityConfig(VideoModalityConfig):
     def __init__(self):
         super().__init__()
-        self.SHAPE = 224
-        self.EXTRACTED_FRAMES_COUNT = 64
         self.FILE_EXT = '_web.mp4'
 
 
 class AudioModalityConfig(TimeDependentModality):
     def __init__(self):
         super().__init__()
+        self.SR = 48000
         self.FILE_EXT = '_mic.wav'
 
 
