@@ -45,7 +45,8 @@ class TransformerModel(BaseModel):
         print(input_tensor.shape)
         x = C3dLayer(self._pretrained_feature_extractor)(input_tensor)
         x = tf.keras.layers.Flatten()(x)
-        x = tf.keras.layers.Dense(units=self._first_layer_num_neurons, activation=self._activation)(x)
+        x = tf.keras.layers.Dense(units=160, activation=self._activation)(x)
+        x = tf.keras.layers.Dense(units=64, activation=self._activation)(x)
         # todo 9
         output_tensor = tf.keras.layers.Dense(units=9, activation='sigmoid')(x)
 
