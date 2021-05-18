@@ -1,4 +1,4 @@
-from configs.ramas_default_config import EXP_NAME
+from configs.common_constants import EXP_NAME
 
 CHECKPOINT_DIR = "gs://transformedd/experiments/" + EXP_NAME + "/checkpoint/"
 CHECKPOINT_NAME = "cp-{epoch:04d}.ckpt"

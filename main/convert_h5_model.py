@@ -1,6 +1,7 @@
 import logging
 from numbers import Real
 
+import keract
 import tensorflow as tf
 from kapre.time_frequency import Melspectrogram
 import numpy as np
@@ -89,6 +90,9 @@ def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.1):
 if __name__ == "__main__":
     new_model = tf.keras.models.load_model('../models/pretrained/c3d.h5')
     new_model.summary()
+    a = keract.get_activations(new_model, np.zeros((1, 16, 112, 112, 64)), layer_names='fc7', auto_compile=True)
+
+    print(a)
     # # Show the model architecture
     # new_model.trainable = False
     # print(new_model.signatures["serving_default"])

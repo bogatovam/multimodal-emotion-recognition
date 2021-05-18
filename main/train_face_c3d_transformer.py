@@ -4,7 +4,7 @@ import sys
 from dataset.manager.data_manager import DataManager
 
 from dataset.preprocessor.face.ft_video_modality_preprocessor import VideoModalityPreprocessor
-from models.transformers.Transformer import TransformerModel
+from models.transformers.transformer import TransformerModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
