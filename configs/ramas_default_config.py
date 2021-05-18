@@ -7,7 +7,7 @@ EXP_NAME = "C3D"
 
 SAMPLES_PER_TFRECORD = 128
 
-BATCH_SIZE = 1
+BATCH_SIZE = 2
 CHECKPOINT_DIR = "..\\experiments\\" + EXP_NAME + "\\checkpoint\\"
 CHECKPOINT_NAME = "cp-{epoch:04d}.ckpt"
 

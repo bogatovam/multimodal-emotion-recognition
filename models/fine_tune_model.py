@@ -35,7 +35,7 @@ class FineTuneModel(BaseModel):
 
         self._optimizer = tf.keras.optimizers.Adam
 
-        self._input_shape = extractor.output_shape
+        self._input_shape = extractor._output_shape
         self._activation = 'relu'
         self._first_layer_num_neurons = 48
         self._second_layer_num_neurons = 34

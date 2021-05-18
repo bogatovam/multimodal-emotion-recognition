@@ -28,5 +28,4 @@ class VideoFeatureExtractor(Enum):
     def __init__(self, *output_shape):
         self.output_shape = output_shape
 
-    C3D = (32, 112, 112, 3),
-    VGG_FACE = (32, 112, 112, 3)
+    C3D = (16, 112, 112, 3)

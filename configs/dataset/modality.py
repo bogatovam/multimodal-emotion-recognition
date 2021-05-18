@@ -73,7 +73,10 @@ class DatasetFeature(Enum):
     def __init__(self, encoder):
         self.encoder = encoder
 
-    L3 = TensorEncoder()
+    AUDIO = TensorEncoder()
+    AUDIO_SHAPE = TensorEncoder()
     VIDEO_SCENE_RAW = TensorEncoder()
+    VIDEO_SCENE_SHAPE = TensorEncoder()
     VIDEO_FACE_RAW = TensorEncoder()
+    VIDEO_FACE_SHAPE = TensorEncoder()
     CLASS = TensorEncoder()

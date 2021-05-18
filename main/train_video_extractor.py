@@ -2,8 +2,8 @@ import os
 import sys
 
 from dataset.manager.data_manager import DataManager
-from dataset.preprocessor.face.ft_video_modality_preprocessor import FineTuneVideoModalityPreprocessor, VideoFeatureExtractor
-from models.audio.audio_extractor_model import FineTuneModel
+from dataset.preprocessor.face.ft_video_modality_preprocessor import VideoModalityPreprocessor, VideoFeatureExtractor
+from models.fine_tune_model import FineTuneModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
@@ -12,7 +12,7 @@ import configs.ramas_default_config as config
 
 
 def main():
-    processor = FineTuneVideoModalityPreprocessor(extractor=VideoFeatureExtractor.C3D)
+    processor = VideoModalityPreprocessor(extractor=VideoFeatureExtractor.C3D)
 
     data_manager = DataManager(dataset_processor=processor,
                                dataset_size=config.DATASET_SIZE,
@@ -21,7 +21,7 @@ def main():
 
     model = FineTuneModel(
         extractor=VideoFeatureExtractor.C3D,
-        pretrained_model_path='../models/pretrained/r2plus1d_34_clip32_ft_kinetics_from_ig65m-10f4c3bf',
+        pretrained_model_path='../models/pretrained/c3d.h5',
         cp_dir=config.CHECKPOINT_DIR,
         cp_name=config.CHECKPOINT_NAME,
         learning_rate=config.LEARNING_RATE,

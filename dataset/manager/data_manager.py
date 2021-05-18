@@ -58,14 +58,14 @@ class DataManager:
         if self._use_cache:
             ds = ds.cache()
 
-        # ds = ds.batch(self._batch_size)
+        ds = ds.batch(self._batch_size)
 
         if self._repeat:
             ds = ds.repeat(self._repeat)
         else:
             ds = ds.repeat()
 
-        # if self._use_prefetch:
-        #     ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
+        if self._use_prefetch:
+            ds = ds.prefetch(tf.data.experimental.AUTOTUNE)
 
         return ds

@@ -87,12 +87,12 @@ def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.1):
 
 
 if __name__ == "__main__":
-    new_model = tf.saved_model.load('../models/pretrained/r2plus1d_34_clip32_ft_kinetics_from_ig65m-10f4c3bf')
-
-    # Show the model architecture
-    new_model.trainable = False
-    print(new_model.signatures["serving_default"])
-    predictor = new_model.signatures["serving_default"]
-    x = np.zeros((1, 3, 32, 112, 112))
-    labeling = predictor(tf.constant(x, dtype=tf.float32))
-    print(labeling['output_0'].shape)
+    new_model = tf.keras.models.load_model('../models/pretrained/c3d.h5')
+    new_model.summary()
+    # # Show the model architecture
+    # new_model.trainable = False
+    # print(new_model.signatures["serving_default"])
+    # predictor = new_model.signatures["serving_default"]
+    # x = np.zeros((1, 3, 32, 112, 112))
+    # labeling = predictor(tf.constant(x, dtype=tf.float32))
+    # print(labeling['output_0'].shape)

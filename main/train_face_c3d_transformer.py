@@ -2,10 +2,8 @@ import os
 import sys
 
 from dataset.manager.data_manager import DataManager
-from dataset.preprocessor.face.face_video_modality_preprocessor import FaceModalityPreprocessor
-from dataset.preprocessor.face.ft_video_modality_preprocessor import FineTuneVideoModalityPreprocessor, \
-    VideoFeatureExtractor
-from models.audio.audio_extractor_model import FineTuneModel
+
+from dataset.preprocessor.face.ft_video_modality_preprocessor import VideoModalityPreprocessor
 from models.transformers.Transformer import TransformerModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
@@ -15,10 +13,9 @@ import configs.ramas_default_config as config
 
 
 def main():
-    processor = FaceModalityPreprocessor(extractor=config.EXTRACTOR,
-                                         frames_step=config.FRAMES_STEP,
-                                         input_face_size=config.INPUT_FACE_SIZE,
-                                         pretrained_model_path=config.PRETRAINED_MODEL_PATH)
+    processor = VideoModalityPreprocessor(extractor=config.EXTRACTOR,
+                                          frames_step=config.FRAMES_STEP,
+                                          input_shape=config.INPUT_FACE_SIZE)
 
     data_manager = DataManager(dataset_processor=processor,
                                dataset_size=config.DATASET_SIZE,
@@ -26,7 +23,8 @@ def main():
                                batch_size=config.BATCH_SIZE)
 
     model = TransformerModel(
-        input_shape=(None, 400),
+        extractor=config.VideoFeatureExtractor.C3D,
+        pretrained_model_path=config.PRETRAINED_MODEL_PATH,
         cp_dir=config.CHECKPOINT_DIR,
         cp_name=config.CHECKPOINT_NAME,
         learning_rate=config.LEARNING_RATE,

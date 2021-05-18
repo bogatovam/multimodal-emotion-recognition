@@ -9,7 +9,7 @@ from configs.dataset.modality import Modality
 DATASET_NAME = "RAMAS"
 DATASET_PATH = "E:/RAMAS/RAMAS"
 DATASET_TF_RECORDS_PATH = "D:/2021/hse/tfrecords"
-# DATASET_TF_RECORDS_PATH = "/content/drive/MyDrive/tfrecords"
+# DATASET_TF_RECORDS_PATH = "/content/drive/MyDrive/RAMAS/tf-records"
 
 MODALITY_TO_DATA: dict = {
     Modality.AUDIO: DATASET_PATH + "/Data/Audio",

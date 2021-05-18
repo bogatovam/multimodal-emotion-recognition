@@ -1,22 +1,31 @@
 from base.base_model import BaseModel
 import tensorflow as tf
 
+from models.transformers.layers.c3d_layer import C3dLayer
+
 
 class TransformerModel(BaseModel):
 
     def __init__(self,
-                 input_shape,
+                 extractor,
                  cp_dir: str,
                  cp_name: str,
+                 pretrained_model_path: str = "",
+                 num_fine_tuned_layers: int = 2,
                  log_and_save_freq_batch: int = 100,
                  learning_rate: float = 0.001,
                  trained: bool = False,
                  iter_per_epoch=390):
+        self._extractor = extractor
+        self._pretrained_feature_extractor = tf.keras.models.load_model(pretrained_model_path, compile=False)
+        self._pretrained_feature_extractor.trainable = False
+
+        self._num_fine_tuned_layers = num_fine_tuned_layers
         self._learning_rate = learning_rate
 
         self._optimizer = tf.keras.optimizers.Adam
 
-        self._input_shape = input_shape
+        self._input_shape = (73, 16, 112, 112, 3)
         self._activation = 'relu'
         self._first_layer_num_neurons = 48
         self._second_layer_num_neurons = 34
@@ -33,8 +42,13 @@ class TransformerModel(BaseModel):
 
     def _build_model(self):
         input_tensor = tf.keras.layers.Input(shape=self._input_shape)
-
-        output_tensor = tf.keras.layers.Dense(units=9, activation='sigmoid')(input_tensor)
+        x = C3dLayer(self._pretrained_feature_extractor)(input_tensor)
+        print(x.shape)
+        x = tf.keras.layers.Flatten()(x)
+        print(x.shape)
+        x = tf.keras.layers.Dense(units=self._first_layer_num_neurons, activation=self._activation)(x)
+        # todo 9
+        output_tensor = tf.keras.layers.Dense(units=9, activation='sigmoid')(x)
 
         model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)
         model.summary()

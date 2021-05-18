@@ -3,7 +3,7 @@ import sys
 
 from dataset.manager.data_manager import DataManager
 from dataset.preprocessor.audio.audio_modality_preprocessor import AudioModalityPreprocessor, AudioFeatureExtractor
-from models.audio.audio_extractor_model import FineTuneModel
+from models.fine_tune_model import FineTuneModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
