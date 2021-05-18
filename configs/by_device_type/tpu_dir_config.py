@@ -9,5 +9,5 @@ TENSORBOARD_NAME = 'epoch-{}'
 # DATASET_PATH = "/content/drive/MyDrive/RAMAS"
 DATASET_TF_RECORDS_PATH = "gs://transformedd/transformer"
 
-PRETRAINED_MODELS = "gs://transformedd/pretrained"
+PRETRAINED_MODELS = "/content/drive/MyDrive/pretrained/"
 
