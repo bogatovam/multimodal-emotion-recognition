@@ -58,7 +58,7 @@ class TransformerModel(BaseModel):
         metrics = ['accuracy']
         self.train_model.compile(
             optimizer=self._optimizer(learning_rate=self._learning_rate),
-            loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+            loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=metrics
         )
         return self.train_model
