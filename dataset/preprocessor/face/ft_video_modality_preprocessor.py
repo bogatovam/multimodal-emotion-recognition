@@ -105,8 +105,7 @@ class VideoModalityPreprocessor(BaseDatasetProcessor):
     @tf.function
     def _decode_image(self, image: tf.Tensor):
         image = tf.ensure_shape(image, shape=(*self._input_shape, 3))
-        image = tf.image.convert_image_dtype(image, dtype=tf.float32)
-        image = tf.image.resize(image, tf.constant(self._output_shape[1:3], dtype=tf.int32))
+        image = tf.image.resize(image, shape=self._output_shape[1:3])
         return image
 
     def _encode_as_dict(self, x: tf.Tensor, label: tf.Tensor) -> dict:

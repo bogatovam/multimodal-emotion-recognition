@@ -48,15 +48,15 @@ class DataManager:
 
     def _preprocess_dataset(self, ds: tf.data.Dataset, ) -> tf.data.Dataset:
         ds = self._dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
-        if self._use_cache:
-            ds = ds.cache()
+        # if self._use_cache:
+        #     ds = ds.cache()
 
         ds = ds.batch(self._batch_size)
-
-        if self._repeat:
-            ds = ds.repeat(self._repeat)
-        else:
-            ds = ds.repeat()
+        #
+        # if self._repeat:
+        #     ds = ds.repeat(self._repeat)
+        # else:
+        #     ds = ds.repeat()
 
         if self._use_prefetch:
             ds = ds.prefetch(tf.data.experimental.AUTOTUNE)

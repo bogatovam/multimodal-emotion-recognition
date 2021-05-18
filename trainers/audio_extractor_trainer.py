@@ -36,8 +36,6 @@ class SimpleTrainer(BaseTrain):
         history = train_model.fit(
             training_dataset,
             epochs=self._num_epochs,
-            steps_per_epoch=self._num_iter_per_epoch,
-            validation_steps=self._validation_steps,
             validation_data=validation_dataset,
             callbacks=callbacks)
 
