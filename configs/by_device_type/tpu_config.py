@@ -1,15 +1,15 @@
 import csv
 import os
-from random import shuffle
-
 import numpy as np
+from random import shuffle
+from configs.common_constants import *
+from configs.dataset.modality import VideoModalityConfig, Modality
+from configs.by_device_type.tpu_dir_config import *
 
-from configs.dataset.modality import Modality
+PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/c3d.h5"
 
-DATASET_NAME = "RAMAS"
-DATASET_PATH = "E:/RAMAS/RAMAS"
-DATASET_TF_RECORDS_PATH = "D:/2021/hse/tfrecords"
-# DATASET_TF_RECORDS_PATH = "/content/drive/MyDrive/RAMAS/tf-records"
+
+ANNOTATIONS_FILE = DATASET_PATH + "/annotationsClass.csv"
 
 MODALITY_TO_DATA: dict = {
     Modality.AUDIO: DATASET_PATH + "/Data/Audio",
@@ -18,11 +18,6 @@ MODALITY_TO_DATA: dict = {
     Modality.VIDEO_FACE: DATASET_PATH + "/Data/Video_close",
     # Modality.KINECT_SKELETON: DATASET_PATH + "/Data/Kinect_skeleton"
 }
-
-ANNOTATIONS_FILE = "D:/2021/hse/course-work/annotationsClass.csv"
-# ANNOTATIONS_FILE = "/content/drive/MyDrive/RAMAS/annotationsClass.csv"
-
-classes = ["Angry", "Sad", "Disgusted", "Happy", "Scared", "Surprised", "Neutral", "Shame", "Tiredness"]
 
 
 class EmotionAnnotation:
@@ -58,6 +53,3 @@ def read_annotations(path):
 
 
 ANNOTATIONS, TARGET_DATASET_LENGTH = read_annotations(ANNOTATIONS_FILE)
-
-if __name__ == '__main__':
-    print("hello")

@@ -27,7 +27,7 @@ class DataManager:
         self.PARALLEL_CALLS = tf.data.experimental.AUTOTUNE
 
         self.train_files, self.test_files = train_test_split(files, test_size=0.3)
-        self.val_files, self.test_files = train_test_split(files, test_size=0.3)
+        self.val_files, self.test_files = train_test_split(self.test_files, test_size=0.3)
 
         print("Train files size: {}".format(len(self.train_files)))
         print("Valid files size: {}".format(len(self.val_files)))

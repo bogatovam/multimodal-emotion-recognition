@@ -9,7 +9,7 @@ from trainers.audio_extractor_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
 
-import configs.ramas_default_config as config
+import configs.by_device_type.cpu_config as config
 
 
 def main():
