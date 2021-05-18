@@ -26,16 +26,16 @@ class DataManager:
         print("Dataset files: {}".format(files))
         self.PARALLEL_CALLS = tf.data.experimental.AUTOTUNE
 
-        # self.train_files, self.test_files = train_test_split(files, test_size=0.3)
-        # self.val_files, self.test_files = train_test_split(self.test_files, test_size=0.3)
-        #
-        # print("Train files size: {}".format(len(self.train_files)))
-        # print("Valid files size: {}".format(len(self.val_files)))
-        # print("Test files size: {}".format(len(self.test_files)))
+        self.train_files, self.test_files = train_test_split(files, test_size=0.3)
+        self.val_files, self.test_files = train_test_split(self.test_files, test_size=0.3)
 
-        self._val_ds = tf.data.TFRecordDataset(files)
-        self._test_ds = tf.data.TFRecordDataset(files)
-        self._train_ds = tf.data.TFRecordDataset(files)
+        print("Train files size: {}".format(len(self.train_files)))
+        print("Valid files size: {}".format(len(self.val_files)))
+        print("Test files size: {}".format(len(self.test_files)))
+
+        self._val_ds = tf.data.TFRecordDataset(self.val_files)
+        self._test_ds = tf.data.TFRecordDataset(self.test_files)
+        self._train_ds = tf.data.TFRecordDataset(self.train_files)
 
     def build_training_dataset(self) -> tf.data.Dataset:
         return self._preprocess_dataset(self._train_ds)
