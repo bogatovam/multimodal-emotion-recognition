@@ -11,12 +11,13 @@ class C3dLayer(tf.keras.layers.Layer):
         print(input_shape)
 
     def call(self, inputs):
-        res = tf.map_fn(lambda batch_elem: self.get_features_from_c3d(batch_elem), inputs)
+        res = tf.map_fn(lambda batch_elem: self._get_features_from_c3d(batch_elem), inputs)
         return res
 
     def _get_features_from_c3d(self, batch_elem):
-        for layer in self.model.layers[1:]:
+        for layer in self.model.layers:
             batch_elem = layer(batch_elem)
             if layer.name == "dropout_1":
                 break
+        print(batch_elem.shape)
         return batch_elem
