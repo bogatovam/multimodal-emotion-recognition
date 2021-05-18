@@ -96,7 +96,8 @@ class VideoModalityPreprocessor(BaseDatasetProcessor):
 
         # (160, 112, 112, 3)
 
-        video_frames = tf.signal.frame(video_frames, self._output_shape[0], self._frames_step, axis=0)
+        video_frames = tf.signal.frame(video_frames, self._output_shape[0], 16, axis=0)
+        print(video_frames.shape)
         # (73, 16, 112, 112, 3)
         return {DatasetFeature.VIDEO_FACE_RAW.name: video_frames,
                 DatasetFeature.CLASS.name: example[DatasetFeature.CLASS.name]}

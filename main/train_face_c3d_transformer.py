@@ -18,7 +18,6 @@ def main():
                                           input_shape=config.INPUT_FACE_SIZE)
 
     data_manager = DataManager(dataset_processor=processor,
-                               dataset_size=config.DATASET_SIZE,
                                tf_record_path=os.path.join(config.DATASET_TF_RECORDS_PATH, config.NAME),
                                batch_size=config.BATCH_SIZE)
 

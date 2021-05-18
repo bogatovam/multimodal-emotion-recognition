@@ -2,13 +2,13 @@ import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from utils.dirs import get_files_from_dir
+from sklearn.model_selection import train_test_split
 
 
 class DataManager:
 
     def __init__(self,
                  dataset_processor: BaseDatasetProcessor,
-                 dataset_size: int,
                  tf_record_path: str,
                  repeat: int = None,
                  batch_size: int = 1,
@@ -24,33 +24,26 @@ class DataManager:
 
         files = get_files_from_dir(tf_record_path)
         print("Dataset files: {}".format(files))
-
-        self._ds_size = dataset_size
-
-        self._ds = tf.data.TFRecordDataset(files)
-
         self.PARALLEL_CALLS = tf.data.experimental.AUTOTUNE
 
-        print("Dataset size:={}".format(self._ds_size))
-        self._val_size = int(0.20 * self._ds_size)
-        self._test_size = int(0.10 * self._ds_size)
-        self._train_size = int(0.7 * self._ds_size)
+        self.train_files, self.test_files = train_test_split(files, test_size=0.3)
+        self.val_files, self.test_files = train_test_split(files, test_size=0.3)
 
-        self._train_ds = self._test_ds = self._val_ds = None
+        print("Train files size: {}".format(len(self.train_files)))
+        print("Valid files size: {}".format(len(self.val_files)))
+        print("Test files size: {}".format(len(self.test_files)))
+
+        self._val_ds = tf.data.TFRecordDataset(self.val_files)
+        self._test_ds = tf.data.TFRecordDataset(self.test_files)
+        self._train_ds = tf.data.TFRecordDataset(self.train_files)
 
     def build_training_dataset(self) -> tf.data.Dataset:
-        self._train_ds = self._ds.take(self._train_size)
-        self._ds.skip(self._train_size)
         return self._preprocess_dataset(self._train_ds)
 
     def build_testing_dataset(self) -> tf.data.Dataset:
-        self._test_ds = self._ds.take(self._test_size)
-        self._ds.skip(self._test_size)
         return self._preprocess_dataset(self._test_ds)
 
     def build_validation_dataset(self) -> tf.data.Dataset:
-        self._val_ds = self._ds.take(self._val_size)
-        self._ds.skip(self._val_size)
         return self._preprocess_dataset(self._val_ds)
 
     def _preprocess_dataset(self, ds: tf.data.Dataset, ) -> tf.data.Dataset:

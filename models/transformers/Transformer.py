@@ -25,7 +25,7 @@ class TransformerModel(BaseModel):
 
         self._optimizer = tf.keras.optimizers.Adam
 
-        self._input_shape = (73, 16, 112, 112, 3)
+        self._input_shape = (10, 16, 112, 112, 3)
         self._activation = 'relu'
         self._first_layer_num_neurons = 48
         self._second_layer_num_neurons = 34
