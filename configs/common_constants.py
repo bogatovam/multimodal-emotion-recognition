@@ -3,7 +3,7 @@ from dataset.preprocessor.feature_extractors_metadata import VideoFeatureExtract
 
 NAME = "emotion-transformer"
 
-EXP_NAME = "C3D"
+EXP_NAME = "rplus1"
 
 FEATURES_COUNT = 40
 
@@ -17,7 +17,7 @@ DATASET_SIZE = 5639
 NUM_EPOCHS = 30
 NUM_ITER_PER_EPOCH = int(DATASET_SIZE / BATCH_SIZE)
 VALIDATION_STEPS = int((DATASET_SIZE * 0.2) / BATCH_SIZE)
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.00001
 
 EXTRACTOR: VideoFeatureExtractor = VideoFeatureExtractor.C3D
 INPUT_FACE_SIZE = (VideoModalityConfig().SHAPE, VideoModalityConfig().SHAPE)

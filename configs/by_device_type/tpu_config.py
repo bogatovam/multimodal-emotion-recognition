@@ -6,7 +6,7 @@ from configs.common_constants import *
 from configs.dataset.modality import VideoModalityConfig, Modality
 from configs.by_device_type.tpu_dir_config import *
 
-PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/c3d.h5"
+PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/rplus1"
 
 
 # ANNOTATIONS_FILE = DATASET_PATH + "/annotationsClass.csv"

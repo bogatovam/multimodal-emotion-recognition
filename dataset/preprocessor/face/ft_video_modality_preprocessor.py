@@ -92,11 +92,15 @@ class VideoModalityPreprocessor(BaseDatasetProcessor):
         # input shape 160, 224, 224, 3
         video_frames = example[DatasetFeature.VIDEO_FACE_RAW.name]
         video_frames = tf.map_fn(self._decode_image, video_frames)
-        video_frames = tf.ensure_shape(video_frames, shape=(160, *self._output_shape[1:]))
 
+        video_frames = tf.ensure_shape(video_frames, shape=(160, 3, 112, 112))
+        # input shape 160, 3, 112, 112
         # (160, 112, 112, 3)
-
-        video_frames = tf.signal.frame(video_frames, self._output_shape[0], 16, axis=0)
+        print(video_frames)
+        video_frames = tf.signal.frame(video_frames, 8, 8, axis=0)
+        print(video_frames.shape)
+        video_frames = tf.transpose(video_frames, (0, 2, 3, 4, 1))
+        print("sss")
         print(video_frames.shape)
         # (73, 16, 112, 112, 3)
         return {DatasetFeature.VIDEO_FACE_RAW.name: video_frames,
@@ -107,6 +111,7 @@ class VideoModalityPreprocessor(BaseDatasetProcessor):
         image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         image = tf.ensure_shape(image, shape=(*self._input_shape, 3))
         image = tf.image.resize(image, self._output_shape[1:3])
+        image = tf.transpose(image, (2, 0, 1))
         return image
 
     def _encode_as_dict(self, x: tf.Tensor, label: tf.Tensor) -> dict:

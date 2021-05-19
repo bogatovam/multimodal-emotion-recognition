@@ -2,6 +2,7 @@ from base.base_model import BaseModel
 import tensorflow as tf
 import numpy as np
 from models.transformers.layers.c3d_layer import C3dLayer
+from models.transformers.layers.rplus1_layer import RPlus1Layer
 
 
 class TransformerModel(BaseModel):
@@ -25,7 +26,7 @@ class TransformerModel(BaseModel):
 
         self._optimizer = tf.keras.optimizers.Adam
 
-        self._input_shape = (10, 16, 112, 112, 3)
+        self._input_shape = (20, 3, 112, 112, 8)
         self._activation = 'relu'
         self._first_layer_num_neurons = 48
         self._second_layer_num_neurons = 34
@@ -43,7 +44,7 @@ class TransformerModel(BaseModel):
     def _build_model(self):
         input_tensor = tf.keras.layers.Input(shape=self._input_shape)
         print(input_tensor.shape)
-        x = C3dLayer(self._pretrained_feature_extractor)(input_tensor)
+        x = RPlus1Layer(self._pretrained_feature_extractor)(input_tensor)
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(units=160, activation=self._activation)(x)
         x = tf.keras.layers.Dense(units=64, activation=self._activation)(x)
