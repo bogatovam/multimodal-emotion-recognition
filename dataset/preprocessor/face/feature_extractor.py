@@ -47,9 +47,7 @@ class FeatureExtractor(BaseDatasetProcessor):
 
     @tf.function
     def concat_with_labels(self, example: tf.train.Example):
-        clazz = tf.slice(example[DatasetFeature.CLASS.name], [0], [7])
-        print(f'clazz.shape:={clazz.shape}')
-        return example[DatasetFeature.VIDEO_FACE_C3D_FEATURES.name], clazz
+        return example[DatasetFeature.VIDEO_FACE_C3D_FEATURES.name], example[DatasetFeature.CLASS.name]
 
     @tf.function
     def _decode_example(self, serialized_example: tf.Tensor) -> dict:
@@ -62,7 +60,7 @@ class FeatureExtractor(BaseDatasetProcessor):
         clazz = tf.cast(clazz, dtype=tf.float32)
         video_fragment = tf.cast(video_fragment, dtype=tf.float32)
 
-        clazz = tf.ensure_shape(clazz, 9)
+        clazz = tf.ensure_shape(clazz, 7)
         # clazz = tf.reshape(clazz, (1, 9))
 
         video_fragment_shape = tf.ensure_shape(video_fragment_shape, (4,))
@@ -94,6 +92,7 @@ class FeatureExtractor(BaseDatasetProcessor):
         # video_frames = self._pad_frames_according_window(video_frames)
         video_frames = tf.signal.frame(video_frames, self._window_width_in_sec * self._fps,
                                        self._window_step_in_sec * self._fps, axis=0)
+        video_frames += (tf.cast(tf.math.equal(video_frames, 0), tf.float32) * -1e9)
         # video_frames.shape = (None, 160, 112, 112, 3)
         return tf.data.Dataset.from_tensor_slices(video_frames).map(lambda x: self._encode_as_dict(x, clazz))
 
