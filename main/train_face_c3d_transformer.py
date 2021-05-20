@@ -30,9 +30,10 @@ def main():
         iter_per_epoch=config.NUM_ITER_PER_EPOCH
     )
 
-    model.load()
+    _, epoch = model.load()
 
     trainer = SimpleTrainer(
+        initial_epoch=epoch,
         model=model,
         data=data_manager,
         board_path=config.TENSORBOARD_DIR,

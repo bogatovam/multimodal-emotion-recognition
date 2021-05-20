@@ -14,7 +14,9 @@ class SimpleTrainer(BaseTrain):
                  num_epochs: int,
                  num_iter_per_epoch,
                  validation_steps,
-                 create_dirs_flag):
+                 create_dirs_flag=False,
+                 initial_epoch=0):
+        self._initial_epoch = initial_epoch
         self._learning_rate = lr
         self._board_path = board_path
         self._log_freq = log_freq
@@ -31,12 +33,24 @@ class SimpleTrainer(BaseTrain):
         train_model = self.model.get_train_model()
 
         callbacks = [*self.model.get_model_callbacks(),
-                     self._get_terminate_on_nan_callback()]
+                     self._get_terminate_on_nan_callback(),
+                     *Logger.get_logger_callbacks(self._board_path, self._log_freq, self._create_dirs_flag)]
 
-        history = train_model.fit(
-            training_dataset,
-            epochs=self._num_epochs,
-            validation_data=validation_dataset,
-            callbacks=callbacks)
+        if not self._num_iter_per_epoch and not self._validation_steps:
+            history = train_model.fit(
+                training_dataset,
+                steps_per_epoch=self._num_iter_per_epoch,
+                initial_epoch=self._initial_epoch,
+                epochs=self._num_epochs,
+                validation_data=validation_dataset,
+                validation_steps=self._validation_steps,
+                callbacks=callbacks)
+        else:
+            history = train_model.fit(
+                training_dataset,
+                initial_epoch=self._initial_epoch,
+                epochs=self._num_epochs,
+                validation_data=validation_dataset,
+                callbacks=callbacks)
 
         return history.history

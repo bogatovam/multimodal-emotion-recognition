@@ -80,3 +80,4 @@ class DatasetFeature(Enum):
     VIDEO_FACE_RAW = TensorEncoder()
     VIDEO_FACE_SHAPE = TensorEncoder()
     CLASS = TensorEncoder()
+    VIDEO_FACE_C3D_FEATURES = {}

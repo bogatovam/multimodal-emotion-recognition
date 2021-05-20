@@ -262,7 +262,7 @@ def _process_video_face_modality(frames: list, fps, example: str, offset: float,
 def _encode_example(features_by_name, clazz):
     tf_features_dict = {}
     for modality, feature in features_by_name.items():
-        tf_features_dict[str(modality.name)] = modality.encoder.transform(feature)
+        tf_features_dict[str(modality.name)] = modality.encoders_block.transform(feature)
 
     tf_features_dict[DatasetFeature.CLASS.name] = DatasetFeature.CLASS.encoder.transform(clazz)
     example = tf.train.Example(features=tf.train.Features(feature=tf_features_dict))

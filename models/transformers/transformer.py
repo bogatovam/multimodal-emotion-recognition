@@ -1,39 +1,43 @@
 from base.base_model import BaseModel
 import tensorflow as tf
-import numpy as np
-from models.transformers.layers.c3d_layer import C3dLayer
-from models.transformers.layers.rplus1_layer import RPlus1Layer
+from models.transformers.layers.encoderblock import EncoderBlock
+import tensorflow_addons as tfa
 
 
 class TransformerModel(BaseModel):
 
     def __init__(self,
-                 extractor,
+                 num_layers,
+                 d_model,
+                 num_heads,
+                 intermediate_fc_units_count,
+                 num_classes,
+                 max_features_count,
+                 input_shape,
+                 dropout_rate,
+                 weight_decay,
                  cp_dir: str,
                  cp_name: str,
-                 pretrained_model_path: str = "",
-                 num_fine_tuned_layers: int = 2,
                  log_and_save_freq_batch: int = 100,
                  learning_rate: float = 0.001,
-                 trained: bool = False,
+                 training: bool = True,
                  iter_per_epoch=390):
-        self._extractor = extractor
-        self._pretrained_feature_extractor = tf.keras.models.load_model(pretrained_model_path, compile=False)
-        self._pretrained_feature_extractor.trainable = False
-
-        self._num_fine_tuned_layers = num_fine_tuned_layers
+        self._weight_decay = weight_decay
         self._learning_rate = learning_rate
 
-        self._optimizer = tf.keras.optimizers.Adam
+        self._optimizer = tfa.optimizers.AdamW
 
-        self._input_shape = (20, 3, 112, 112, 8)
-        self._activation = 'relu'
-        self._first_layer_num_neurons = 48
-        self._second_layer_num_neurons = 34
-        self._initializer = tf.keras.initializers.glorot_normal
+        self._input_shape = input_shape
+        self._num_layers = num_layers
+        self._d_model = d_model
+        self._num_heads = num_heads
+        self._intermediate_fc_units_count = intermediate_fc_units_count
+        self._num_classes = num_classes
+        self._max_features_count = max_features_count
+        self._dropout_rate = dropout_rate
 
-        self.train_model, self.test_model = self._build_model()
-        self.model = self.test_model if trained else self.train_model
+        self.model = self._build_model(training=training)
+        self.model.summary()
 
         super(TransformerModel, self).__init__(cp_dir=cp_dir,
                                                cp_name=cp_name,
@@ -41,52 +45,36 @@ class TransformerModel(BaseModel):
                                                model=self.model,
                                                iter_per_epoch=iter_per_epoch)
 
-    def _build_model(self):
+    def _build_model(self, training=True) -> tf.keras.Model:
         input_tensor = tf.keras.layers.Input(shape=self._input_shape)
-        print(input_tensor.shape)
-        x = RPlus1Layer(self._pretrained_feature_extractor)(input_tensor)
-        x = tf.keras.layers.Flatten()(x)
-        x = tf.keras.layers.Dense(units=160, activation=self._activation)(x)
-        x = tf.keras.layers.Dense(units=64, activation=self._activation)(x)
-        # todo 9
-        output_tensor = tf.keras.layers.Dense(units=9, activation='sigmoid')(x)
+        self.encoders_block = EncoderBlock(num_layers=self._num_layers,
+                                           d_model=self._d_model,
+                                           num_heads=self._num_heads,
+                                           dropout_rate=self._dropout_rate,
+                                           max_features_count=self._max_features_count,
+                                           intermediate_fc_units_count=self._intermediate_fc_units_count)
 
-        model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)
-        model.summary()
-        return model, model
+        enc_padding_mask = self.create_padding_mask(input_tensor)
+        encoder_output, attention_weights = self.encoders_block(input_tensor, mask=enc_padding_mask, training=training)
+        block_output = tf.keras.layers.Flatten()(encoder_output)
+        output_tensor = tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(block_output)
+        train_model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)
+        test_model = tf.keras.Model(inputs=input_tensor, outputs=[output_tensor, attention_weights])
+        return train_model if training else test_model
 
     def get_train_model(self):
-        metrics = ['accuracy']
-        self.train_model.compile(
-            optimizer=self._optimizer(learning_rate=self._learning_rate),
+        metrics = ['accuracy',
+                   tfa.metrics.F1Score(num_classes=self._num_classes, average='micro'),
+                   tfa.metrics.F1Score(num_classes=self._num_classes, average='macro')]
+        self.model.compile(
+            optimizer=self._optimizer(learning_rate=self._learning_rate, weight_decay=self._weight_decay, beta_1=0.9,
+                                      beta_2=0.98, epsilon=1e-9),
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=metrics
         )
-        return self.train_model
-
-    def get_test_model(self):
-        return self.test_model
+        return self.model
 
     def create_padding_mask(self, seq):
         seq = tf.cast(tf.math.equal(seq, 0), tf.float32)
-
+        print(f'seq.shape:={seq.shape}')
         return seq[:, tf.newaxis, tf.newaxis, :]  # (batch_size, 1, 1, seq_len)
-
-    def positional_encoding(self, position, d_model):
-        angle_rads = self.get_angles(np.arange(position)[:, np.newaxis],
-                                     np.arange(d_model)[np.newaxis, :],
-                                     d_model)
-
-        # apply sin to even indices in the array; 2i
-        angle_rads[:, 0::2] = np.sin(angle_rads[:, 0::2])
-
-        # apply cos to odd indices in the array; 2i+1
-        angle_rads[:, 1::2] = np.cos(angle_rads[:, 1::2])
-
-        pos_encoding = angle_rads[np.newaxis, ...]
-
-        return tf.cast(pos_encoding, dtype=tf.float32)
-
-    def get_angles(self, pos, i, d_model):
-        angle_rates = 1 / np.power(10000, (2 * (i // 2)) / np.float32(d_model))
-        return pos * angle_rates
