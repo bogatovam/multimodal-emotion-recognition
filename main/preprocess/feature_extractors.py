@@ -58,7 +58,7 @@ def extract_vgg_features(model, frames) -> np.ndarray:
 def extract_r2_plus1_features(model, frames) -> np.ndarray:
     model_input = np.array(list(map(r2_plus_1_preprocess, frames)))
     model_input = tf.signal.frame(model_input, 8, 4, axis=0).numpy()
-    model_input = np.transpose(model_input, (0, 2, 3, 4, 1))
+    model_input = np.transpose(model_input, (0, 2, 3, 4, 1)).astype(np.float32)
     features = np.array(list(map(lambda x: model(tf.expand_dims(x, 0))['635'], model_input)))
     features = np.array(list(map(lambda x: np.squeeze(x), features)))
     return features
