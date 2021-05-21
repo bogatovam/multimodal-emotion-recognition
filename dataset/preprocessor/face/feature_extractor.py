@@ -2,7 +2,6 @@ import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from configs.dataset.modality import DatasetFeature
-from dataset.preprocessor.feature_extractors_metadata import VideoFeatureExtractor
 import numpy as np
 
 
@@ -51,7 +50,7 @@ class FeatureExtractor(BaseDatasetProcessor):
 
     @tf.function
     def _decode_example(self, serialized_example: tf.Tensor) -> dict:
-        example = tf.io.parse_single_example(serialized_example, self._feature_description)
+        example = tf.io.parseingle_example(serialized_example, self._feature_description)
 
         video_fragment_shape = tf.io.parse_tensor(example[DatasetFeature.VIDEO_FACE_SHAPE.name], tf.int32)
         video_fragment = tf.io.parse_tensor(example[DatasetFeature.VIDEO_FACE_RAW.name], tf.uint8)

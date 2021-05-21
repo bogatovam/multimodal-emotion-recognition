@@ -7,7 +7,7 @@ import tensorflow as tf
 class TfExampleWriter:
     def __init__(self, dataset_name, base_filename: str, records_per_file: int):
         self._file_writer = tf.io.TFRecordWriter
-        self._filename_format = base_filename + "\\" + dataset_name + "-{}.tfrecords"
+        self._filename_format = base_filename + "/" + dataset_name + "-{}.tfrecords"
 
         self._records_per_file = records_per_file
         self._example_counter = 0

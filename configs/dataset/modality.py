@@ -17,6 +17,20 @@ class VideoModalityConfig(TimeDependentModality):
         self.FILE_EXT = '_Video.mp4'
 
 
+class ShimmersConfig(TimeDependentModality):
+    def __init__(self):
+        super().__init__()
+        self.EXAMPLES_PER_SECOND = 10
+        self.FILE_EXT = '_Shimmer.csv'
+
+
+class SkeletonConfig(TimeDependentModality):
+    def __init__(self):
+        super().__init__()
+        self.EXAMPLES_PER_SECOND = 10
+        self.FILE_EXT = '_Kinect.csv'
+
+
 class VideoSceneModalityConfig(VideoModalityConfig):
     def __init__(self):
         super().__init__()
@@ -43,8 +57,8 @@ class Modality(Enum):
     AUDIO = AudioModalityConfig()
     VIDEO_FACE = VideoModalityConfig()
     VIDEO_SCENE = VideoSceneModalityConfig()
-    SHIMMERS = TimeDependentModality()
-    KINECT_SKELETON = TimeDependentModality()
+    SHIMMERS = ShimmersConfig()
+    KINECT_SKELETON = SkeletonConfig()
 
 
 class ByteEncoder:
@@ -80,4 +94,11 @@ class DatasetFeature(Enum):
     VIDEO_FACE_RAW = TensorEncoder()
     VIDEO_FACE_SHAPE = TensorEncoder()
     CLASS = TensorEncoder()
-    VIDEO_FACE_C3D_FEATURES = {}
+    VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder()
+    VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder()
+    VIDEO_SCENE_IV3_FEATURES = TensorEncoder()
+    VIDEO_FACE_VGG_FEATURES = TensorEncoder()
+    VIDEO_FACE_IR50_FEATURES = TensorEncoder()
+    SKELETON = TensorEncoder()
+    SHIMMERS = TensorEncoder()
+    SHIMMERS_SHAPE = TensorEncoder()

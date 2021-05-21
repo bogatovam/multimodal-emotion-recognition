@@ -10,14 +10,14 @@ from configs.by_device_type.cpu_dir_config import *
 
 PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/rplus1"
 
-ANNOTATIONS_FILE = DATASET_PATH + "/annotationsClass.csv"
+ANNOTATIONS_FILE = "D:/2021/hse/course-work" + "/annotationsClass.csv"
 
 MODALITY_TO_DATA: dict = {
     Modality.AUDIO: DATASET_PATH + "/Data/Audio",
-    # Modality.SHIMMERS: DATASET_PATH + "/Data/Shimmers",
+    Modality.SHIMMERS: DATASET_PATH + "/Data/Shimmers",
     Modality.VIDEO_SCENE: DATASET_PATH + "/Data/Video_web",
     Modality.VIDEO_FACE: DATASET_PATH + "/Data/Video_close",
-    # Modality.KINECT_SKELETON: DATASET_PATH + "/Data/Kinect_skeleton"
+    Modality.KINECT_SKELETON: DATASET_PATH + "/Data/Kinect_skeleton"
 }
 
 
@@ -53,4 +53,4 @@ def read_annotations(path):
     return file_to_annotation_list, target_dataset_length
 
 
-# ANNOTATIONS, TARGET_DATASET_LENGTH = read_annotations(ANNOTATIONS_FILE)
+ANNOTATIONS, TARGET_DATASET_LENGTH = read_annotations(ANNOTATIONS_FILE)

@@ -1,5 +1,4 @@
 from configs.dataset.modality import VideoModalityConfig
-from dataset.preprocessor.feature_extractors_metadata import VideoFeatureExtractor
 
 NAME = "emotion-transformer"
 
@@ -19,10 +18,9 @@ NUM_ITER_PER_EPOCH = int(DATASET_SIZE / BATCH_SIZE)
 VALIDATION_STEPS = int((DATASET_SIZE * 0.2) / BATCH_SIZE)
 LEARNING_RATE = 0.00001
 
-EXTRACTOR: VideoFeatureExtractor = VideoFeatureExtractor.C3D
-INPUT_FACE_SIZE = (VideoModalityConfig().SHAPE, VideoModalityConfig().SHAPE)
+INPUT_FACE_SIZE = (224, 224)
 FRAMES_STEP = 2
 
 DATASET_NAME = "RAMAS"
 
-classes = ["Angry", "Sad", "Disgusted", "Happy", "Scared", "Surprised", "Neutral", "Shame", "Tiredness"]
+classes = ["Angry", "Sad", "Disgusted", "Happy", "Scared", "Surprised", "Neutral"]

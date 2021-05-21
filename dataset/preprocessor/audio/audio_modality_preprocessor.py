@@ -2,7 +2,6 @@ import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from configs.dataset.modality import DatasetFeature, TimeDependentModality
-from dataset.preprocessor.feature_extractors_metadata import AudioFeatureExtractor
 
 
 class AudioModalityPreprocessor(BaseDatasetProcessor):

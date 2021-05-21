@@ -2,13 +2,12 @@ import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
 from configs.dataset.modality import DatasetFeature
-from dataset.preprocessor.feature_extractors_metadata import VideoFeatureExtractor
 import numpy as np
 
 
 class VideoModalityPreprocessor(BaseDatasetProcessor):
 
-    def __init__(self, extractor: VideoFeatureExtractor, input_shape, frames_step,
+    def __init__(self, extractor, input_shape, frames_step,
                  window_width_in_sec=5,
                  window_step_in_sec=1, fps=32):
         self._extractor = extractor
