@@ -48,7 +48,7 @@ def read_annotations(path):
             target_dataset_length += 1
 
     file_to_annotation_list = list(file_to_annotation.items())
-    shuffle(file_to_annotation_list)
+    # shuffle(file_to_annotation_list)
     return file_to_annotation_list, target_dataset_length
 
 

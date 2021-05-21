@@ -86,6 +86,11 @@ def IR50(input_size=(112, 112, 3), weights_path=None, model_name="IR50"):
     return model
 
 
+def _process_frames(*data):
+    # print(f'[{filename}] Saving window position... ')
+    print(data)
+    # writer.write(_encode_example(_extract_features_from_data(filename, data), emotion.emotions_vector))
+
 if __name__ == "__main__":
     # model = create_model_functional()
     # try:
@@ -133,11 +138,11 @@ if __name__ == "__main__":
     # x = np.zeros((1, 3, 112, 112, 8), dtype=np.float32)
     # labeling = predictor(tf.constant(x, dtype=tf.float32))
     # print(labeling['635'].shape)
-    new_model = tf.keras.models.load_model('../../models/pretrained/ir50_ms1m_keras.h5')
-    new_model.summary()
-    frames = np.zeros((2, 112, 112, 3))
-    intermediate_layer_model = Model(inputs=new_model.input,
-                                     outputs=new_model.get_layer('flatten_1').output)
+    # new_model = tf.keras.models.load_model('../../models/pretrained/ir50_ms1m_keras.h5')
+    # new_model.summary()
+    # frames = np.zeros((2, 112, 112, 3))
+    # intermediate_layer_model = Model(inputs=new_model.input,
+    #                                  outputs=new_model.get_layer('flatten_1').output)
     # input_tensor = tf.keras.layers.Input(shape=(112, 112, 3))
     # x = input_tensor
     # for layer in new_model.layers[:-1]:
@@ -149,4 +154,9 @@ if __name__ == "__main__":
     #
     # layer_output = model.predict(frames)
 
-    print(intermediate_layer_model.predict(frames).shape)
+    # print(intermediate_layer_model.predict(frames).shape)
+    from multiprocessing import Pool
+
+    pool = Pool(8)
+    pool.apply(_process_frames, np.zeros((10, 10)))
+

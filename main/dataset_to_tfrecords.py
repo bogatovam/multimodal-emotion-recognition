@@ -105,7 +105,7 @@ def _extract_features_from_data(filename, data_from_window) -> dict:
     for i in range(1):
         features_by_name = {}
 
-        Face
+        # Face
         print(f'[{filename}] Extracting features ...')
         face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
         print(f'[{filename}] Extracting r2_plus1_features features: shape:={face_features_r2.shape}')

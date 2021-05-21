@@ -102,3 +102,4 @@ class DatasetFeature(Enum):
     SKELETON = TensorEncoder()
     SHIMMERS = TensorEncoder()
     SHIMMERS_SHAPE = TensorEncoder()
+    SKELETON_SHAPE = TensorEncoder()
