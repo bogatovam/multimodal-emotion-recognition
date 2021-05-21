@@ -105,34 +105,34 @@ def _extract_features_from_data(filename, data_from_window) -> dict:
     for i in range(1):
         features_by_name = {}
 
-        # Face
-        # print(f'[{filename}] Extracting features ...')
-        # face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
-        # print(f'[{filename}] Extracting r2_plus1_features features: shape:={face_features_r2.shape}')
-        #
-        # face_features_vgg = extract_vgg_features(vgg_face_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
-        # print(f'[{filename}] Extracting vgg_features features: shape:={face_features_vgg.shape}')
-        #
-        # face_features_ir50 = extract_ir50_face_features(ir50_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
-        # print(f'[{filename}] Extracting ir50_face_features features: shape:={face_features_ir50.shape}')
-        #
-        # features_by_name[DatasetFeature.VIDEO_FACE_VGG_FEATURES] = face_features_vgg
-        # features_by_name[DatasetFeature.VIDEO_FACE_IR50_FEATURES] = face_features_ir50
-        # features_by_name[DatasetFeature.VIDEO_FACE_R2PLUS1_FEATURES] = face_features_r2
-        #
-        # # Scene
-        # scene_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
-        # print(f'[{filename}] Extracting r2_plus1_features features: shape:={scene_features_r2.shape}')
-        # scene_features_iv3 = extract_iv3_features(inception_v3_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
-        # print(f'[{filename}] Extracting iv3_features features: shape:={scene_features_iv3.shape}')
-        #
-        # features_by_name[DatasetFeature.VIDEO_SCENE_R2PLUS1_FEATURES] = scene_features_r2
-        # features_by_name[DatasetFeature.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
-        #
-        # # Audio
-        # audio_features = extract_l3_features(audio_model, data_from_window[DatasetFeature.AUDIO])
-        # print(f'[{filename}] Extracting l3_features features: shape:={audio_features.shape}')
-        # features_by_name[DatasetFeature.AUDIO] = audio_features
+        Face
+        print(f'[{filename}] Extracting features ...')
+        face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        print(f'[{filename}] Extracting r2_plus1_features features: shape:={face_features_r2.shape}')
+
+        face_features_vgg = extract_vgg_features(vgg_face_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        print(f'[{filename}] Extracting vgg_features features: shape:={face_features_vgg.shape}')
+
+        face_features_ir50 = extract_ir50_face_features(ir50_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        print(f'[{filename}] Extracting ir50_face_features features: shape:={face_features_ir50.shape}')
+
+        features_by_name[DatasetFeature.VIDEO_FACE_VGG_FEATURES] = face_features_vgg
+        features_by_name[DatasetFeature.VIDEO_FACE_IR50_FEATURES] = face_features_ir50
+        features_by_name[DatasetFeature.VIDEO_FACE_R2PLUS1_FEATURES] = face_features_r2
+
+        # Scene
+        scene_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
+        print(f'[{filename}] Extracting r2_plus1_features features: shape:={scene_features_r2.shape}')
+        scene_features_iv3 = extract_iv3_features(inception_v3_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
+        print(f'[{filename}] Extracting iv3_features features: shape:={scene_features_iv3.shape}')
+
+        features_by_name[DatasetFeature.VIDEO_SCENE_R2PLUS1_FEATURES] = scene_features_r2
+        features_by_name[DatasetFeature.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
+
+        # Audio
+        audio_features = extract_l3_features(audio_model, data_from_window[DatasetFeature.AUDIO])
+        print(f'[{filename}] Extracting l3_features features: shape:={audio_features.shape}')
+        features_by_name[DatasetFeature.AUDIO] = audio_features
 
         # Shimmers
         if DatasetFeature.SHIMMERS in features_by_name:
@@ -184,8 +184,6 @@ def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder
 
                 offset = emotion.offset
                 duration = emotion.duration
-                if duration != 1.0:
-                    continue
                 data_by_window = {}
                 for modality, data_path in modality_to_data.items():
                     filename = os.path.join(data_path, file_name) + modality.config.FILE_EXT
