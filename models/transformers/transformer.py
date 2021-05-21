@@ -57,9 +57,9 @@ class TransformerModel(BaseModel):
                                            max_features_count=self._max_features_count,
                                            intermediate_fc_units_count=self._intermediate_fc_units_count)
 
-        enc_padding_mask = self.create_padding_mask(input_tensor)
+        # enc_padding_mask = self.create_padding_mask(input_tensor)
         # (batch_size, features_len, d_model)
-        encoder_output, attention_weights = self.encoders_block(input_tensor, mask=enc_padding_mask, training=training)
+        encoder_output, attention_weights = self.encoders_block(input_tensor, training=training)
         block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
         flatten_output = tf.keras.layers.Flatten()(block_output)
         output_tensor = tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(flatten_output)

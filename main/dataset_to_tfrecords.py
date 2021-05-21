@@ -5,7 +5,7 @@ import tensorflow as tf
 
 import configs.by_device_type.cpu_config as config
 
-from configs.dataset.modality import Modality, DatasetFeature
+from configs.dataset.modality import Modality, DatasetFeaturesSet
 from dataset.tf_example_writer import TfExampleWriter
 from main.preprocess.feature_extractors import extract_r2_plus1_features, get_ir50_face_model, get_vgg_face_model, \
     get_r2_plus_1_model, extract_vgg_features, extract_ir50_face_features, get_inception_v3_model, extract_iv3_features, \
@@ -15,8 +15,7 @@ from main.preprocess.shimmers_feature_extractors import open_shimmers
 from main.preprocess.video_preprocessing import extract_frames_from_video_with_fps, open_video
 from utils.dirs import create_dirs
 
-# strategy = tf.distribute.MirroredStrategy()
-
+# with tf.device('/device:GPU:0'):
 vgg_face_model = get_vgg_face_model()
 audio_model = get_l3_model(config.PRETRAINED_MODELS)
 ir50_model = get_ir50_face_model(config.PRETRAINED_MODELS)
@@ -31,8 +30,8 @@ def _process_audio_modality(filename: str, offset: float, duration: float, modal
     features_by_name = {}
     audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration, sr=modality.config.SR)
     audio = _apply_window_to_signal(audio_raw, modality.config.SR, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
-    features_by_name[DatasetFeature.AUDIO] = audio
-    print(f"[INFO][{filename}][Audio] Complete audio: shape:={features_by_name[DatasetFeature.AUDIO].shape}")
+    features_by_name[DatasetFeaturesSet.AUDIO] = audio
+    print(f"[INFO][{filename}][Audio] Complete audio: shape:={features_by_name[DatasetFeaturesSet.AUDIO].shape}")
     return features_by_name
 
 
@@ -42,7 +41,7 @@ def _process_video_face_modality(frames: list, fps, example: str, offset: float,
     sparse_frames = extract_frames_from_video_with_fps(frames, fps, example, offset, duration, modality)
     sparse_frames = _apply_window_to_signal(sparse_frames, modality.config.FPS, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
     return {
-        DatasetFeature.VIDEO_FACE_RAW: sparse_frames
+        DatasetFeaturesSet.VIDEO_FACE_RAW: sparse_frames
     }
 
 
@@ -52,7 +51,7 @@ def _process_video_scene_modality(frames: list, fps, example: str, offset: float
     sparse_frames = extract_frames_from_video_with_fps(frames, fps, example, offset, duration, modality)
     sparse_frames = _apply_window_to_signal(sparse_frames, modality.config.FPS, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
     return {
-        DatasetFeature.VIDEO_SCENE_RAW: sparse_frames
+        DatasetFeaturesSet.VIDEO_SCENE_RAW: sparse_frames
     }
 
 
@@ -69,7 +68,7 @@ def _process_skeleton_modality(example: str, file: np.ndarray, examples_per_seco
     print(f"[INFO][{example}] Preprocess skeleton input: examples_count:{skeleton.shape}")
     skeleton = _apply_window_to_signal(skeleton, examples_per_second, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
     return {
-        DatasetFeature.SKELETON: skeleton
+        DatasetFeaturesSet.SKELETON: skeleton
     }
 
 
@@ -86,7 +85,7 @@ def _process_shimmers_modality(example: str, file: np.ndarray, examples_per_seco
     print(f"[INFO][{example}] Preprocess shimmers input: examples_count:{shimmers.shape}")
     shimmers = _apply_window_to_signal(shimmers, examples_per_second, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
     return {
-        DatasetFeature.SHIMMERS: shimmers
+        DatasetFeaturesSet.SHIMMERS: shimmers
     }
 
 
@@ -101,49 +100,50 @@ def _apply_window_to_signal(signal, elements_per_sec, window_len_sec, step_len_s
 
 
 def _extract_features_from_data(filename, data_from_window) -> dict:
-    # with strategy:
     for i in range(1):
+        # with tf.device('/device:GPU:0'):
         features_by_name = {}
 
-        # Face
+        # # Face
         print(f'[{filename}] Extracting features ...')
-        face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeaturesSet.VIDEO_FACE_RAW])
         print(f'[{filename}] Extracting r2_plus1_features features: shape:={face_features_r2.shape}')
 
-        face_features_vgg = extract_vgg_features(vgg_face_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        face_features_vgg = extract_vgg_features(vgg_face_model, data_from_window[DatasetFeaturesSet.VIDEO_FACE_RAW])
         print(f'[{filename}] Extracting vgg_features features: shape:={face_features_vgg.shape}')
 
-        face_features_ir50 = extract_ir50_face_features(ir50_model, data_from_window[DatasetFeature.VIDEO_FACE_RAW])
+        face_features_ir50 = extract_ir50_face_features(ir50_model, data_from_window[DatasetFeaturesSet.VIDEO_FACE_RAW])
         print(f'[{filename}] Extracting ir50_face_features features: shape:={face_features_ir50.shape}')
 
-        features_by_name[DatasetFeature.VIDEO_FACE_VGG_FEATURES] = face_features_vgg
-        features_by_name[DatasetFeature.VIDEO_FACE_IR50_FEATURES] = face_features_ir50
-        features_by_name[DatasetFeature.VIDEO_FACE_R2PLUS1_FEATURES] = face_features_r2
+        features_by_name[DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES] = face_features_vgg
+        features_by_name[DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES] = face_features_ir50
+        features_by_name[DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES] = face_features_r2
 
         # Scene
-        scene_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
+        scene_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeaturesSet.VIDEO_SCENE_RAW])
         print(f'[{filename}] Extracting r2_plus1_features features: shape:={scene_features_r2.shape}')
-        scene_features_iv3 = extract_iv3_features(inception_v3_model, data_from_window[DatasetFeature.VIDEO_SCENE_RAW])
+        scene_features_iv3 = extract_iv3_features(inception_v3_model, data_from_window[DatasetFeaturesSet.VIDEO_SCENE_RAW])
         print(f'[{filename}] Extracting iv3_features features: shape:={scene_features_iv3.shape}')
 
-        features_by_name[DatasetFeature.VIDEO_SCENE_R2PLUS1_FEATURES] = scene_features_r2
-        features_by_name[DatasetFeature.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
+        features_by_name[DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES] = scene_features_r2
+        features_by_name[DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
 
         # Audio
-        audio_features = extract_l3_features(audio_model, data_from_window[DatasetFeature.AUDIO])
+        audio_features = extract_l3_features(audio_model, data_from_window[DatasetFeaturesSet.AUDIO])
         print(f'[{filename}] Extracting l3_features features: shape:={audio_features.shape}')
-        features_by_name[DatasetFeature.AUDIO] = audio_features
+        features_by_name[DatasetFeaturesSet.AUDIO] = audio_features
 
         # Shimmers
-        if DatasetFeature.SHIMMERS in features_by_name:
-            shimmers_features = process_shimmers_features(data_from_window[DatasetFeature.SHIMMERS])
+        if DatasetFeaturesSet.SHIMMERS in data_from_window:
+            shimmers_features = process_shimmers_features(data_from_window[DatasetFeaturesSet.SHIMMERS])
             print(f'[{filename}] Extracting shimmers_features features: shape:={shimmers_features.shape}')
-            features_by_name[DatasetFeature.SHIMMERS] = shimmers_features
+            features_by_name[DatasetFeaturesSet.SHIMMERS] = np.nan_to_num(shimmers_features)
 
-        # Pose
-        pose_features = extract_pose_features(data_from_window[DatasetFeature.SKELETON])
-        print(f'[{filename}] Extracting pose_features features: shape:={pose_features.shape}')
-        features_by_name[DatasetFeature.SKELETON] = pose_features
+            # Pose
+        if DatasetFeaturesSet.SKELETON in data_from_window:
+            pose_features = extract_pose_features(data_from_window[DatasetFeaturesSet.SKELETON])
+            print(f'[{filename}] Extracting pose_features features: shape:={pose_features.shape}')
+            features_by_name[DatasetFeaturesSet.SKELETON] = np.nan_to_num(pose_features)
 
     return features_by_name
 
@@ -153,20 +153,29 @@ def _encode_example(features_by_name, clazz):
     for modality, feature in features_by_name.items():
         tf_features_dict[str(modality.name)] = modality.encoder.transform(feature)
 
-    tf_features_dict[DatasetFeature.CLASS.name] = DatasetFeature.CLASS.encoder.transform(clazz)
-    if DatasetFeature.SHIMMERS.name not in tf_features_dict:
-        tf_features_dict[DatasetFeature.SHIMMERS.name] = DatasetFeature.SHIMMERS.encoder.transform(np.asarray([0]))
-        tf_features_dict[DatasetFeature.SHIMMERS_SHAPE.name] = DatasetFeature.SHIMMERS.encoder.transform(
-            np.asarray([0]))
+    tf_features_dict[DatasetFeaturesSet.CLASS.name] = DatasetFeaturesSet.CLASS.encoder.transform(clazz)
+    fake_data = np.asarray([0], dtype=np.float32)
+    fake = np.asarray([0], dtype=np.int32)
+    if DatasetFeaturesSet.SHIMMERS.name not in tf_features_dict:
+        tf_features_dict[DatasetFeaturesSet.SHIMMERS.name] = DatasetFeaturesSet.SHIMMERS.encoder.transform(fake_data)
+        tf_features_dict[DatasetFeaturesSet.SHIMMERS_SHAPE.name] = DatasetFeaturesSet.SHIMMERS.encoder.transform(fake)
     else:
-        tf_features_dict[DatasetFeature.SHIMMERS_SHAPE.name] = \
-            DatasetFeature.SHIMMERS.encoder.transform(tf_features_dict[DatasetFeature.SHIMMERS.name].shape)
+        shape = features_by_name[DatasetFeaturesSet.SHIMMERS].shape
+        tf_features_dict[DatasetFeaturesSet.SHIMMERS_SHAPE.name] = DatasetFeaturesSet.SHIMMERS.encoder.transform(shape)
+
+    if DatasetFeaturesSet.SKELETON.name not in tf_features_dict:
+        tf_features_dict[DatasetFeaturesSet.SKELETON.name] = DatasetFeaturesSet.SKELETON.encoder.transform(fake_data)
+        tf_features_dict[DatasetFeaturesSet.SKELETON_SHAPE.name] = DatasetFeaturesSet.SKELETON.encoder.transform(fake)
+    else:
+        shape = features_by_name[DatasetFeaturesSet.SKELETON].shape
+        tf_features_dict[DatasetFeaturesSet.SKELETON_SHAPE.name] = DatasetFeaturesSet.SKELETON.encoder.transform(shape)
+
     example = tf.train.Example(features=tf.train.Features(feature=tf_features_dict))
     return example.SerializeToString()
 
 
 def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder: str, samples_per_tfrecord: int):
-    tf_dataset_path = output_folder + "/" + name
+    tf_dataset_path = output_folder + "/" + name + "/tmp"
     create_dirs([output_folder, tf_dataset_path])
 
     # Train/Test/Val split will be performed later, before learning
@@ -204,6 +213,8 @@ def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder
                     elif modality == Modality.KINECT_SKELETON:
                         if skeleton_file is None:
                             skeleton_file = open_skeleton(filename, modality.config.EXAMPLES_PER_SECOND)
+                        if skeleton_file.shape[0] == 0:
+                            continue
                         data_by_window.update(_process_skeleton_modality(filename, skeleton_file,
                                                                          modality.config.EXAMPLES_PER_SECOND,
                                                                          offset, duration))

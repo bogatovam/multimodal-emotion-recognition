@@ -77,29 +77,32 @@ class TensorEncoder(ByteEncoder):
         return super().transform(feature)
 
 
-class DatasetFeature(Enum):
+class FeaturesSetConfig:
+    def __init__(self, shape):
+        self.shape = shape
+
+
+class DatasetFeaturesSet(Enum):
     def __new__(cls, *args, **kwds):
         value = len(cls.__members__) + 1
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, encoder):
+    def __init__(self, encoder, config):
         self.encoder = encoder
+        self.config = config
 
-    AUDIO = TensorEncoder()
-    AUDIO_SHAPE = TensorEncoder()
-    VIDEO_SCENE_RAW = TensorEncoder()
-    VIDEO_SCENE_SHAPE = TensorEncoder()
-    VIDEO_FACE_RAW = TensorEncoder()
-    VIDEO_FACE_SHAPE = TensorEncoder()
-    CLASS = TensorEncoder()
-    VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder()
-    VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder()
-    VIDEO_SCENE_IV3_FEATURES = TensorEncoder()
-    VIDEO_FACE_VGG_FEATURES = TensorEncoder()
-    VIDEO_FACE_IR50_FEATURES = TensorEncoder()
-    SKELETON = TensorEncoder()
-    SHIMMERS = TensorEncoder()
-    SHIMMERS_SHAPE = TensorEncoder()
-    SKELETON_SHAPE = TensorEncoder()
+    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512))
+    VIDEO_SCENE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
+    VIDEO_FACE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
+    CLASS = TensorEncoder(), FeaturesSetConfig(shape=7)
+    VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
+    VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
+    VIDEO_SCENE_IV3_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 2, 2, 2048))
+    VIDEO_FACE_VGG_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
+    VIDEO_FACE_IR50_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
+    SKELETON = TensorEncoder(), FeaturesSetConfig(shape=(9, 28))
+    SHIMMERS = TensorEncoder(), FeaturesSetConfig(shape=(50, 18))
+    SHIMMERS_SHAPE = TensorEncoder(), FeaturesSetConfig(shape=0)
+    SKELETON_SHAPE = TensorEncoder(), FeaturesSetConfig(shape=0)

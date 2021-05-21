@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
-from configs.dataset.modality import DatasetFeature
+from configs.dataset.modality import DatasetFeaturesSet
 import numpy as np
 
 
@@ -27,9 +27,9 @@ class FeatureExtractor(BaseDatasetProcessor):
         self._feature_extractor = self._feature_extractor.signatures["serving_default"]
 
         self._feature_description = {
-            DatasetFeature.VIDEO_FACE_RAW.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.VIDEO_FACE_SHAPE.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeature.CLASS.name: tf.io.FixedLenFeature([], tf.string)
+            DatasetFeaturesSet.VIDEO_FACE_RAW.name: tf.io.FixedLenFeature([], tf.string),
+            DatasetFeaturesSet.VIDEO_FACE_SHAPE.name: tf.io.FixedLenFeature([], tf.string),
+            DatasetFeaturesSet.CLASS.name: tf.io.FixedLenFeature([], tf.string)
         }
 
     def pre_process(self, dataset: tf.data.Dataset, parallel_calls: int):
@@ -46,15 +46,15 @@ class FeatureExtractor(BaseDatasetProcessor):
 
     @tf.function
     def concat_with_labels(self, example: tf.train.Example):
-        return example[DatasetFeature.VIDEO_FACE_C3D_FEATURES.name], example[DatasetFeature.CLASS.name]
+        return example[DatasetFeaturesSet.VIDEO_FACE_C3D_FEATURES.name], example[DatasetFeaturesSet.CLASS.name]
 
     @tf.function
     def _decode_example(self, serialized_example: tf.Tensor) -> dict:
         example = tf.io.parseingle_example(serialized_example, self._feature_description)
 
-        video_fragment_shape = tf.io.parse_tensor(example[DatasetFeature.VIDEO_FACE_SHAPE.name], tf.int32)
-        video_fragment = tf.io.parse_tensor(example[DatasetFeature.VIDEO_FACE_RAW.name], tf.uint8)
-        clazz = tf.io.parse_tensor(example[DatasetFeature.CLASS.name], tf.double)
+        video_fragment_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.VIDEO_FACE_SHAPE.name], tf.int32)
+        video_fragment = tf.io.parse_tensor(example[DatasetFeaturesSet.VIDEO_FACE_RAW.name], tf.uint8)
+        clazz = tf.io.parse_tensor(example[DatasetFeaturesSet.CLASS.name], tf.double)
 
         clazz = tf.cast(clazz, dtype=tf.float32)
         video_fragment = tf.cast(video_fragment, dtype=tf.float32)
@@ -66,15 +66,15 @@ class FeatureExtractor(BaseDatasetProcessor):
         video_fragment_shape = tf.expand_dims(video_fragment_shape, 1)
 
         return {
-            DatasetFeature.VIDEO_FACE_SHAPE.name: video_fragment_shape,
-            DatasetFeature.VIDEO_FACE_RAW.name: video_fragment,
-            DatasetFeature.CLASS.name: clazz
+            DatasetFeaturesSet.VIDEO_FACE_SHAPE.name: video_fragment_shape,
+            DatasetFeaturesSet.VIDEO_FACE_RAW.name: video_fragment,
+            DatasetFeaturesSet.CLASS.name: clazz
         }
 
     @tf.function
     def _split_by_windows(self, example: tf.Tensor) -> dict:
-        clazz = example[DatasetFeature.CLASS.name]
-        shape_tensor = example[DatasetFeature.VIDEO_FACE_SHAPE.name]
+        clazz = example[DatasetFeaturesSet.CLASS.name]
+        shape_tensor = example[DatasetFeaturesSet.VIDEO_FACE_SHAPE.name]
         frames_count = shape_tensor[0]
         frames_count = tf.expand_dims(frames_count, 1)
         pad = tf.pad(frames_count, [[0, 0], [0, 1]], constant_values=self._window_width_in_sec * self._fps)
@@ -82,7 +82,7 @@ class FeatureExtractor(BaseDatasetProcessor):
                         axis=0)
         new_pad = tf.math.abs(tf.math.subtract(pad, self._window_width_in_sec * self._fps))
         # clazz.shape = (1, 9)
-        video_frames = example[DatasetFeature.VIDEO_FACE_RAW.name]
+        video_frames = example[DatasetFeaturesSet.VIDEO_FACE_RAW.name]
         video_frames = tf.pad(video_frames, new_pad)
         # video_frames.shape = (None, 112, 112, 3)
         # 160 frames = 5 * 35 = 5 sec = 5 * 1 sec
@@ -97,23 +97,23 @@ class FeatureExtractor(BaseDatasetProcessor):
 
     @tf.function
     def _C3D_preprocess_frames(self, example: tf.train.Example):
-        video_frames = example[DatasetFeature.VIDEO_FACE_RAW.name]  # None, 224, 224, 3
+        video_frames = example[DatasetFeaturesSet.VIDEO_FACE_RAW.name]  # None, 224, 224, 3
         video_frames = tf.map_fn(self._decode_image, video_frames)
         video_frames = tf.ensure_shape(video_frames, shape=(None, 3, 112, 112))  # None, 3, 112, 112
         video_frames_tensors = tf.signal.frame(video_frames, 8, self._frames_step, axis=0)  # None, 8, 3, 112, 112
         print(f'video_frames_tensors.shape:={video_frames_tensors.shape}')
         video_frames_tensors = tf.transpose(video_frames_tensors, (0, 2, 3, 4, 1))  # None, 3, 112, 112, 8
-        return {DatasetFeature.VIDEO_FACE_RAW.name: video_frames_tensors,
-                DatasetFeature.CLASS.name: example[DatasetFeature.CLASS.name]}
+        return {DatasetFeaturesSet.VIDEO_FACE_RAW.name: video_frames_tensors,
+                DatasetFeaturesSet.CLASS.name: example[DatasetFeaturesSet.CLASS.name]}
 
     @tf.function
     def _extract_features_tensor_frames(self, example: tf.train.Example):
-        video_frames_tensors = example[DatasetFeature.VIDEO_FACE_RAW.name]  # None, 3, 112, 112, 8
+        video_frames_tensors = example[DatasetFeaturesSet.VIDEO_FACE_RAW.name]  # None, 3, 112, 112, 8
         features = tf.map_fn(lambda el: self._feature_extractor(tf.expand_dims(el, 0))['635'], video_frames_tensors)
         features = tf.map_fn(lambda el: tf.squeeze(el), features)
         features = tf.ensure_shape(features, shape=(None, 512))  # None, 3, 112, 112
-        return {DatasetFeature.VIDEO_FACE_C3D_FEATURES.name: features,
-                DatasetFeature.CLASS.name: example[DatasetFeature.CLASS.name]}
+        return {DatasetFeaturesSet.VIDEO_FACE_C3D_FEATURES.name: features,
+                DatasetFeaturesSet.CLASS.name: example[DatasetFeaturesSet.CLASS.name]}
 
     @tf.function
     def _decode_image(self, image: tf.Tensor):
@@ -124,5 +124,5 @@ class FeatureExtractor(BaseDatasetProcessor):
         return image
 
     def _encode_as_dict(self, x: tf.Tensor, label: tf.Tensor) -> dict:
-        return {DatasetFeature.VIDEO_FACE_RAW.name: x,
-                DatasetFeature.CLASS.name: label}
+        return {DatasetFeaturesSet.VIDEO_FACE_RAW.name: x,
+                DatasetFeaturesSet.CLASS.name: label}

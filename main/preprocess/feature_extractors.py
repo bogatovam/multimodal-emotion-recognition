@@ -120,7 +120,7 @@ def extract_pose_features(examples):
     # norm & stand
     features = np.array(list(map(stand, features)))
     min_max_scaler = preprocessing.MinMaxScaler()
-    return min_max_scaler.fit_transform(features)
+    return min_max_scaler.fit_transform(features).astype(np.float32)
 
 
 def stand(x):

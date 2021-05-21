@@ -1,8 +1,8 @@
-import os
 import sys
 
+from configs.dataset.modality import DatasetFeaturesSet
 from dataset.manager.data_manager import DataManager
-from dataset.preprocessor.face.feature_extractor import FeatureExtractor
+from dataset.preprocessor.multimodal_dataset_features_processor import MultimodalDatasetFeaturesProcessor
 from models.transformers.transformer import TransformerModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
@@ -12,12 +12,10 @@ import configs.by_device_type.cpu_config as config
 
 
 def main():
-    processor = FeatureExtractor(pretrained_model_path='../models/pretrained/rplus1',
-                                 input_shape=(224, 224), frames_step=4,
-                                 output_shape=(112, 112))
+    processor = MultimodalDatasetFeaturesProcessor(modalities_list=[DatasetFeaturesSet.SKELETON])
 
     data_manager = DataManager(dataset_processor=processor,
-                               tf_record_path=os.path.join(config.DATASET_TF_RECORDS_PATH, config.NAME),
+                               tf_record_path=config.DATASET_TF_RECORDS_PATH + "/" + config.NAME,
                                batch_size=config.BATCH_SIZE)
 
     model = TransformerModel(
@@ -27,7 +25,7 @@ def main():
         intermediate_fc_units_count=2048,
         num_classes=7,
         max_features_count=10000,
-        input_shape=(39, 512),
+        input_shape=DatasetFeaturesSet.SKELETON.config.shape,
         dropout_rate=0.1,
         weight_decay=0.00001,
         learning_rate=0.001,
