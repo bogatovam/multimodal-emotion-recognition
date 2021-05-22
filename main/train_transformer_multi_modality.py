@@ -3,6 +3,7 @@ import sys
 from configs.dataset.modality import DatasetFeaturesSet
 from dataset.manager.data_manager import DataManager
 from dataset.preprocessor.multimodal_dataset_features_processor import MultimodalDatasetFeaturesProcessor
+from models.transformers.multi_modal_transformer import MultiModelTransformerModel
 from models.transformers.transformer import TransformerModel
 from trainers.audio_extractor_trainer import SimpleTrainer
 
@@ -12,23 +13,26 @@ import configs.by_device_type.cpu_config as config
 
 
 def main():
-    processor = MultimodalDatasetFeaturesProcessor(modalities_list=[DatasetFeaturesSet.SKELETON])
+    modalities = [DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES, DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES]
+    processor = MultimodalDatasetFeaturesProcessor(modalities_list=modalities)
 
     data_manager = DataManager(dataset_processor=processor,
                                tf_record_path=config.DATASET_TF_RECORDS_PATH + "/" + config.NAME,
                                batch_size=config.BATCH_SIZE)
 
-    model = TransformerModel(
+    model = MultiModelTransformerModel(
+        fusion_type='mha',
+        pooling_size=4,
+        modalities_list=modalities,
         num_layers=2,
         d_model=512,
         num_heads=8,
         intermediate_fc_units_count=2048,
         num_classes=7,
         max_features_count=10000,
-        input_shape=DatasetFeaturesSet.SKELETON.config.shape,
         dropout_rate=0.1,
         weight_decay=0.00001,
-        learning_rate=0.001,
+        learning_rate=0.0001,
         cp_dir=config.CHECKPOINT_DIR,
         cp_name=config.CHECKPOINT_NAME,
         iter_per_epoch=config.NUM_ITER_PER_EPOCH

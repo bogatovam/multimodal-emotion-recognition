@@ -5,7 +5,6 @@ from tensorflow.keras.activations import softmax
 class SoftAttention(tf.keras.layers.Layer):
     def __init__(self, intermediate_fc_units_count, dropout_rate, soft_attention_output_units=1):
         self._soft_attention_output_units = soft_attention_output_units
-
         self.mlp = tf.keras.Sequential([
             tf.keras.layers.Dense(intermediate_fc_units_count, activation='relu'),  # (batch_size, seq_len, dff)
             tf.keras.layers.Dropout(dropout_rate),  # (batch_size, seq_len, d_model)
@@ -17,7 +16,8 @@ class SoftAttention(tf.keras.layers.Layer):
         super(SoftAttention, self).__init__()
 
     def call(self, x):
-        # (None, 39, 512)
+        # x = (batch, seq_len, d_model)
+        # attention = (batch, seq_len, 1)
         attention = self.mlp(x)
         att_list = []
         for i in range(self._soft_attention_output_units):

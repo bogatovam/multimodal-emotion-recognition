@@ -1,9 +1,9 @@
 from base.base_model import BaseModel
 import tensorflow as tf
-from models.transformers.layers.encoderblock import EncoderBlock
+from models.layers.encoderblock import EncoderBlock
 import tensorflow_addons as tfa
 
-from models.transformers.layers.soft_attention import SoftAttention
+from models.layers.soft_attention import SoftAttention
 
 
 class TransformerModel(BaseModel):
@@ -20,6 +20,7 @@ class TransformerModel(BaseModel):
                  weight_decay,
                  cp_dir: str,
                  cp_name: str,
+                 soft_attention_output_units=1,
                  log_and_save_freq_batch: int = 100,
                  learning_rate: float = 0.001,
                  training: bool = True,
@@ -34,6 +35,7 @@ class TransformerModel(BaseModel):
         self._num_layers = num_layers
         self._d_model = d_model
         self._num_heads = num_heads
+        self._soft_attention_output_units = soft_attention_output_units
         self._intermediate_fc_units_count = intermediate_fc_units_count
         self._num_classes = num_classes
         self._max_features_count = max_features_count
@@ -60,7 +62,9 @@ class TransformerModel(BaseModel):
         # enc_padding_mask = self.create_padding_mask(input_tensor)
         # (batch_size, features_len, d_model)
         encoder_output, attention_weights = self.encoders_block(input_tensor, training=training)
+        # print(encoder_output.shape) (seq_len, d_model)
         block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
+        # print(block_output.shape) (self._soft_attention_output_units, d_model)
         flatten_output = tf.keras.layers.Flatten()(block_output)
         output_tensor = tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(flatten_output)
         train_model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)

@@ -54,8 +54,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         for modality in self._modalities_list:
             inputs.append(example[str(modality.name)])
 
-        inputs.append(example[DatasetFeaturesSet.CLASS.name])
-        return inputs
+        return tuple(inputs), example[DatasetFeaturesSet.CLASS.name]
 
     @tf.function
     def _decode_example(self, serialized_example: tf.Tensor) -> dict:

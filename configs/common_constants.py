@@ -1,8 +1,8 @@
 from configs.dataset.modality import VideoModalityConfig
 
-NAME = "ramas_features"
+NAME = "emotion-transformer"
 
-EXP_NAME = "rplus1"
+EXP_NAME = "multimodal-sum"
 
 FEATURES_COUNT = 40
 
