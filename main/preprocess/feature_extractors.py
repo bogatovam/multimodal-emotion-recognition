@@ -32,8 +32,13 @@ def get_inception_v3_model(base_path):
 
 
 def get_l3_model(base_path):
-    return tf.keras.models.load_model(base_path + "/openl3_audio_mel256_music.h5", custom_objects={
+    model = tf.keras.models.load_model(base_path + "/openl3_audio_mel256_music.h5", custom_objects={
         'Melspectrogram': Melspectrogram}, compile=False)
+
+    intermediate_layer_model = Model(inputs=model.input,
+                                     outputs=model.get_layer('activation_7').output)
+
+    return intermediate_layer_model
 
 
 def extract_ir50_face_features(model, frames) -> np.ndarray:

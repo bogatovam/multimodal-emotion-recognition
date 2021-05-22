@@ -104,7 +104,7 @@ def _extract_features_from_data(filename, data_from_window) -> dict:
         # with tf.device('/device:GPU:0'):
         features_by_name = {}
 
-        # # Face
+        # Face
         print(f'[{filename}] Extracting features ...')
         face_features_r2 = extract_r2_plus1_features(r2_plus_1_model, data_from_window[DatasetFeaturesSet.VIDEO_FACE_RAW])
         print(f'[{filename}] Extracting r2_plus1_features features: shape:={face_features_r2.shape}')
@@ -175,7 +175,7 @@ def _encode_example(features_by_name, clazz):
 
 
 def _process_multimodal_dataset(name: str, modality_to_data: dict, output_folder: str, samples_per_tfrecord: int):
-    tf_dataset_path = output_folder + "/" + name + "/tmp"
+    tf_dataset_path = output_folder + "/" + name
     create_dirs([output_folder, tf_dataset_path])
 
     # Train/Test/Val split will be performed later, before learning

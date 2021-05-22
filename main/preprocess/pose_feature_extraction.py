@@ -24,18 +24,29 @@ pose_columns = ['spine_base.X', 'spine_base.Y', 'spine_base.Z', 'spine.X', 'spin
 
 def open_skeleton(filename: str, elements_per_sec=5) -> np.ndarray:
     try:
+        np_array = None
         df = pd.read_csv(filename, index_col=None, header=0)
         step = 1 / elements_per_sec
+
+        for c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors='coerce')
+
+        df = df.dropna()
         if 'Time' in df.columns:
             df = df.sort_values('Time')
             max_ = df['Time'].max()
             grouped = df.groupby(pd.cut(df['Time'], np.arange(0, max_ + step, step))).mean()
-            return grouped.drop(['Frame', 'Time'], axis=1).to_numpy()
+            np_array = grouped.drop(['Frame', 'Time'], axis=1).to_numpy()
         else:
             df = df.sort_values('Frame')
             max_ = df['Frame'].max()
             grouped = df.groupby(pd.cut(df['Frame'], np.arange(0, max_ + step, elements_per_sec))).mean()
-            return grouped.drop(['Frame'], axis=1).to_numpy()
+            np_array = grouped.drop(['Frame'], axis=1).to_numpy()
+
+        if np_array.shape[1] < 75:
+            delta = 75 - np_array.shape[1]
+            np_array = np.pad(np_array, ((0, 0), (0, delta)))
+        return np_array
     except FileNotFoundError:
         return np.asarray([])
 

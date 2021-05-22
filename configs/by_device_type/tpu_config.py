@@ -8,7 +8,6 @@ from configs.by_device_type.tpu_dir_config import *
 
 PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/rplus1"
 
-
 ANNOTATIONS_FILE = DATASET_PATH + "/annotationsClass.csv"
 
 MODALITY_TO_DATA: dict = {
@@ -48,6 +47,17 @@ def read_annotations(path):
             target_dataset_length += 1
 
     file_to_annotation_list = list(file_to_annotation.items())
+    filenames = list(map(lambda x: x[0], file_to_annotation_list))
+
+    start_index = filenames.index('15dec_K11_2')
+
+    res = []
+    target_dataset_length = 0
+    for i, file_to_emotions in enumerate(file_to_annotation_list):
+        if i < start_index:
+            continue
+        res.append(file_to_emotions)
+        target_dataset_length += len(file_to_emotions[1])
     # shuffle(file_to_annotation_list)
     return file_to_annotation_list, target_dataset_length
 

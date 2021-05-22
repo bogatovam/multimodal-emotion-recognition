@@ -1,6 +1,6 @@
 from configs.dataset.modality import VideoModalityConfig
 
-NAME = "emotion-transformer"
+NAME = "ramas_features"
 
 EXP_NAME = "rplus1"
 
