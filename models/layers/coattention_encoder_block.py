@@ -35,7 +35,7 @@ class CoAttentionEncoderLayer(tf.keras.layers.Layer):
         attn_output = self.dropout1(attn_output, training=training)
         out1 = self.layer_norm1(x + attn_output)  # (batch_size, input_seq_len, d_model)
 
-        attn_output2, attention_weights2 = self.mha2(y, y, x, mask)  # (batch_size, input_seq_len, d_model)
+        attn_output2, attention_weights2 = self.mha2(y, y, out1, mask)  # (batch_size, input_seq_len, d_model)
         attn_output2 = self.dropout2(attn_output2, training=training)
         out2 = self.layer_norm2(out1 + attn_output2)  # (batch_size, input_seq_len, d_model)
 
@@ -44,13 +44,13 @@ class CoAttentionEncoderLayer(tf.keras.layers.Layer):
         out3 = self.layer_norm3(out2 + ffn_output)  # (batch_size, input_seq_len, d_model)
 
         if self.is_last:
-            return out3, attention_weights
+            return out3, attention_weights, attention_weights2
 
         soft_att_output = self._soft_attention(out3)
         soft_att_output = self.dropout4(soft_att_output, training=training)
         out4 = self.layer_norm4(out3 + soft_att_output)  # (batch_size, input_seq_len, d_model)
 
-        return out4, attention_weights
+        return out4, attention_weights, attention_weights2
 
     def point_wise_feed_forward_network(self, d_model, dff):
         return tf.keras.Sequential([
@@ -90,8 +90,9 @@ class CoAttentionEncoderBlock(tf.keras.layers.Layer):
         x = self.dropout(x, training=training)
 
         for i in range(self.num_layers):
-            x, attention = self.enc_layers[i](x, y, training, mask)
-            attention_weights[f'encoder_layer{i + 1}_block1'] = attention
+            x, attention1, attention2 = self.enc_layers[i](x, y, training, mask)
+            attention_weights[f'encoder_layer{i + 1}_block1'] = attention1
+            attention_weights[f'encoder_layer{i + 1}_block1_mm'] = attention2
 
         return x, attention_weights  # (batch_size, input_seq_len, d_model)
 

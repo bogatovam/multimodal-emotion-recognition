@@ -21,7 +21,8 @@ def main():
                                batch_size=config.BATCH_SIZE)
 
     model = MultiModelTransformerModel(
-        fusion_type='mha',
+        fusion_type='sum',
+        # co_attention=True,
         pooling_size=4,
         modalities_list=modalities,
         num_layers=2,
