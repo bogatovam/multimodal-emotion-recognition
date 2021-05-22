@@ -1,6 +1,7 @@
 from base.base_model import BaseModel
 import tensorflow as tf
 
+from models.layers.coattention_encoder_block import CoAttentionEncoderBlock
 from models.layers.fusion.concatenation_fusion_layer import ConcatenationFusionLayer
 from models.layers.fusion.fbr_fusion_layer import FactorizedPoolingFusionLayer
 from models.layers.fusion.sum_fusion_layer import SumFusionLayer
@@ -125,41 +126,41 @@ class MultiModelTransformerModel(BaseModel):
 
     def _build_co_attention_sum_fusion_model(self, training=True) -> tf.keras.Model:
         inputs = self._build_multimodal_input()
-        intra_modality_outputs, attention_intra_modality_weights = self._build_usual_transformer_block(inputs, training)
+        intra_modality_outputs, im_weights, mm_weights = self._build_co_attention_transformer_block(inputs, training)
 
         fusion_output = SumFusionLayer()(intra_modality_outputs)
         output_tensor = self._build_classification_layer(fusion_output)
 
         train_model = tf.keras.Model(inputs=inputs, outputs=output_tensor)
-        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, *attention_intra_modality_weights])
+        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, im_weights, mm_weights])
         return train_model if training else test_model
 
     def _build_co_attention_concatenation_fusion_model(self, training=True) -> tf.keras.Model:
         inputs = self._build_multimodal_input()
-        intra_modality_outputs, attention_intra_modality_weights = self._build_usual_transformer_block(inputs, training)
+        intra_modality_outputs, im_weights, mm_weights = self._build_co_attention_transformer_block(inputs, training)
 
         fusion_output = ConcatenationFusionLayer()(intra_modality_outputs)
         print(f'fusion_output.shape:={fusion_output.shape}')
         output_tensor = self._build_classification_layer(fusion_output)
 
         train_model = tf.keras.Model(inputs=inputs, outputs=output_tensor)
-        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, *attention_intra_modality_weights])
+        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, im_weights, mm_weights])
         return train_model if training else test_model
 
     def _build_co_attention_fbp_fusion_model(self, training=True) -> tf.keras.Model:
         inputs = self._build_multimodal_input()
-        intra_modality_outputs, attention_intra_modality_weights = self._build_usual_transformer_block(inputs, training)
+        intra_modality_outputs, im_weights, mm_weights = self._build_co_attention_transformer_block(inputs, training)
 
         fusion_output = FactorizedPoolingFusionLayer(self._dropout_rate, self._pooling_size)(intra_modality_outputs)
         output_tensor = self._build_classification_layer(fusion_output)
 
         train_model = tf.keras.Model(inputs=inputs, outputs=output_tensor)
-        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, *attention_intra_modality_weights])
+        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, im_weights, mm_weights])
         return train_model if training else test_model
 
     def _build_co_attention_mha_fusion_model(self, training=True) -> tf.keras.Model:
         inputs = self._build_multimodal_input()
-        intra_modality_outputs, attention_intra_modality_weights = self._build_usual_transformer_block(inputs, training)
+        intra_modality_outputs, im_weights, mm_weights = self._build_co_attention_transformer_block(inputs, training)
 
         fusion_output, _ = MultimodalEncoderLayer(d_model=self._d_model,
                                                   num_heads=self._num_heads,
@@ -169,7 +170,7 @@ class MultiModelTransformerModel(BaseModel):
         flatten_output = tf.keras.layers.Flatten()(fusion_output)
         output_tensor = self._build_classification_layer(flatten_output)
         train_model = tf.keras.Model(inputs=inputs, outputs=output_tensor)
-        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, *attention_intra_modality_weights])
+        test_model = tf.keras.Model(inputs=inputs, outputs=[output_tensor, im_weights, mm_weights])
         return train_model if training else test_model
 
     def _build_multimodal_input(self):
@@ -194,6 +195,30 @@ class MultiModelTransformerModel(BaseModel):
         print(f'transformers output shape:={intra_modality_outputs.shape}')
         return intra_modality_outputs, attention_intra_modality_weights
 
+    def _build_co_attention_transformer_block(self, inputs, training):
+        attention_intra_modality_weights = []
+        attention_multi_modality_weights = []
+
+        print(f'input_0.shape:={inputs[0].shape}')
+        intra_modality_outputs, weights = self._build_unimodal_transformer(inputs[0], training)
+        attention_intra_modality_weights.append(weights)
+        attention_multi_modality_weights.append({})
+        print(f'block{0}_output.shape:={intra_modality_outputs.shape}')
+
+        for i in range(1, len(inputs)):
+            print(f'input_{i}.shape:={inputs[i].shape}')
+            output, weights, multimodal_attention_weights = self._build_co_attention_transformer(inputs[i - 1],
+                                                                                                 inputs[i],
+                                                                                                 training)
+
+            intra_modality_outputs = tf.concat([intra_modality_outputs, output], axis=1)
+            attention_intra_modality_weights.append(weights)
+            attention_multi_modality_weights.append(multimodal_attention_weights)
+            print(f'block{i}_output.shape:={intra_modality_outputs.shape}')
+
+        print(f'transformers output shape:={intra_modality_outputs.shape}')
+        return intra_modality_outputs, attention_intra_modality_weights, attention_multi_modality_weights
+
     def _build_unimodal_transformer(self, input_, training):
         encoders_block = MultimodalEncoderBlock(num_layers=self._num_layers,
                                                 d_model=self._d_model,
@@ -206,6 +231,21 @@ class MultiModelTransformerModel(BaseModel):
         block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
         # flatten_output = tf.keras.layers.Flatten()(block_output)
         return block_output, attention_weights
+
+    def _build_co_attention_transformer(self, input_prev, input_curr, training):
+        encoders_block = CoAttentionEncoderBlock(num_layers=self._num_layers,
+                                                 d_model=self._d_model,
+                                                 num_heads=self._num_heads,
+                                                 dropout_rate=self._dropout_rate,
+                                                 max_features_count=self._max_features_count,
+                                                 intermediate_fc_units_count=self._intermediate_fc_units_count,
+                                                 soft_attention_output_units=input_prev.shape[1])
+        encoder_output, attention_weights, multimodal_attention_weights = encoders_block(input_prev,
+                                                                                         input_curr,
+                                                                                         training=training)
+        block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
+        # flatten_output = tf.keras.layers.Flatten()(block_output)
+        return block_output, attention_weights, multimodal_attention_weights
 
     def _build_classification_layer(self, features):
         return tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(features)
