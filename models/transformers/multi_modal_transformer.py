@@ -166,8 +166,8 @@ class MultiModelTransformerModel(BaseModel):
                                                   num_heads=self._num_heads,
                                                   dropout_rate=self._dropout_rate,
                                                   intermediate_fc_units_count=self._intermediate_fc_units_count,
-                                                  soft_attention_output_units=1, is_last=True)(intra_modality_outputs,
-                                                                                               training, None)
+                                                  soft_attention_output_units=1)(intra_modality_outputs,
+                                                                                 training, None)
         flatten_output = tf.keras.layers.Flatten()(fusion_output)
         output_tensor = self._build_classification_layer(flatten_output)
         train_model = tf.keras.Model(inputs=inputs, outputs=output_tensor)
