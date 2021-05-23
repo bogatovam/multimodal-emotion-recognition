@@ -130,9 +130,10 @@ if __name__ == "__main__":
     # _ = [print('{:.5f} {}'.format(output[0][i], labels[i])) for i in top_inds]
     # print(output)
     # # Show the model architecture
-    new_model =  tf.keras.models.load_model("../../models/pretrained/openl3_audio_mel256_music.h5", custom_objects={
-        'Melspectrogram': Melspectrogram}, compile=False)
-    new_model.summary()
+    import tensorflow_hub as hub
+
+    model = hub.load('https://tfhub.dev/google/yamnet/1')
+    print(model.signatures)
     # new_model.trainable = False
     # print(new_model.signatures["serving_default"])
     # predictor = new_model.signatures["serving_default"]

@@ -2,6 +2,7 @@ from numbers import Real
 
 import cv2
 import numpy as np
+import opensmile
 import tensorflow as tf
 from kapre.time_frequency import Melspectrogram
 from keras import Model
@@ -52,8 +53,8 @@ def extract_iv3_features(model, frames) -> np.ndarray:
 
 
 def extract_l3_features(model, audio) -> np.ndarray:
-    model_input = _l3_preprocess_audio(audio, AudioModalityConfig().SR)
-    return model.predict(model_input)
+    # model_input = _l3_preprocess_audio(audio, AudioModalityConfig().SR)
+    return model.predict(audio)
 
 
 def extract_vgg_features(model, frames) -> np.ndarray:
@@ -79,7 +80,7 @@ def resize_preprocess(frame):
     return cv2.resize(frame, (112, 112))
 
 
-def _l3_preprocess_audio(audio, sr, hop_size=1):
+def _l3_preprocess_audio(audio, sr, hop_size=0.1):
     if audio.size == 0:
         raise RuntimeError('Got empty audio')
 
@@ -130,3 +131,12 @@ def extract_pose_features(examples):
 
 def stand(x):
     return (x - np.mean(x) / np.std(x)) if np.std(x) != 0.0 else x
+
+
+def _extract_opensmile_features(audio, sr, features_set):
+    smile = opensmile.Smile(
+        feature_set=features_set,
+        feature_level=opensmile.FeatureLevel.Functionals,
+    )
+
+    return np.array(list(map(lambda x: smile.process_signal(x, sr), audio)))

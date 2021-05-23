@@ -78,8 +78,9 @@ class TensorEncoder(ByteEncoder):
 
 
 class FeaturesSetConfig:
-    def __init__(self, shape):
+    def __init__(self, shape, input_shape=None):
         self.shape = shape
+        self.input_shape = input_shape if input_shape is not None else shape
 
 
 class DatasetFeaturesSet(Enum):
@@ -93,13 +94,16 @@ class DatasetFeaturesSet(Enum):
         self.encoder = encoder
         self.config = config
 
-    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512))
+    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
+    OPENSMILE_GeMAPSv01b = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
+    OPENSMILE_eGeMAPSv02 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
+    OPENSMILE_ComParE_2016 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
     VIDEO_SCENE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     VIDEO_FACE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     CLASS = TensorEncoder(), FeaturesSetConfig(shape=7)
     VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
     VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
-    VIDEO_SCENE_IV3_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 2, 2, 2048))
+    VIDEO_SCENE_IV3_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 2, 2, 2048), input_shape=(160, 8192))
     VIDEO_FACE_VGG_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
     VIDEO_FACE_IR50_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
     SKELETON = TensorEncoder(), FeaturesSetConfig(shape=(9, 28))
