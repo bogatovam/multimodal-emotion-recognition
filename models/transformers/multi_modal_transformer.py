@@ -249,13 +249,31 @@ class MultiModelTransformerModel(BaseModel):
         return tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(features)
 
     def get_train_model(self):
+        lr = CustomSchedule(self._d_model)
         metrics = ['accuracy',
                    tfa.metrics.F1Score(name='f1_micro', num_classes=self._num_classes, average='micro'),
                    tfa.metrics.F1Score(name='f1_macro', num_classes=self._num_classes, average='macro')]
         self.model.compile(
-            optimizer=self._optimizer(learning_rate=self._learning_rate, weight_decay=self._weight_decay, beta_1=0.9,
+            optimizer=self._optimizer(learning_rate=lr, beta_1=0.9,
                                       beta_2=0.98, epsilon=1e-9),
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=metrics
         )
         return self.model
+
+
+class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+    def __init__(self, d_model, warmup_steps=4000):
+        super(CustomSchedule, self).__init__()
+
+        self.d_model = d_model
+        self.d_model = tf.cast(self.d_model, tf.float32)
+
+        self.warmup_steps = warmup_steps
+
+    def __call__(self, step):
+        step = tf.cast(step, tf.float32)
+        arg1 = tf.math.rsqrt(step)
+        arg2 = step * self.warmup_steps ** -1.5
+
+        return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
