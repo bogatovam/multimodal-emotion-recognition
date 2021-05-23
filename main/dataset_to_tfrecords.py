@@ -30,8 +30,8 @@ STEP_LEN_IN_SEC = 2
 
 def _process_audio_modality(filename: str, offset: float, duration: float, modality) -> dict:
     features_by_name = {}
-    audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration, sr=240000)
-    audio = _apply_window_to_signal(audio_raw, 240000, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
+    audio_raw, audio_raw_rate = lb.load(filename, offset=offset, duration=duration, sr=48000)
+    audio = _apply_window_to_signal(audio_raw, 48000, WINDOW_LEN_IN_SEC, STEP_LEN_IN_SEC)
     features_by_name[DatasetFeaturesSet.AUDIO] = audio
     print(f"[INFO][{filename}][Audio] Complete audio: shape:={features_by_name[DatasetFeaturesSet.AUDIO].shape}")
     return features_by_name
@@ -105,7 +105,7 @@ def _extract_features_from_data(filename, data_from_window) -> dict:
     with tf.device('/device:GPU:0'):
         features_by_name = {}
 
-        Face
+        # Face
         print(f'[{filename}] Extracting features ...')
         face_features_r2 = extract_r2_plus1_features(r2_plus_1_model,
                                                      data_from_window[DatasetFeaturesSet.VIDEO_FACE_RAW])
@@ -125,26 +125,26 @@ def _extract_features_from_data(filename, data_from_window) -> dict:
         scene_features_r2 = extract_r2_plus1_features(r2_plus_1_model,
                                                       data_from_window[DatasetFeaturesSet.VIDEO_SCENE_RAW])
         print(f'[{filename}] Extracting r2_plus1_features features: shape:={scene_features_r2.shape}')
-        scene_features_iv3 = extract_iv3_features(inception_v3_model,
-                                                  data_from_window[DatasetFeaturesSet.VIDEO_SCENE_RAW])
-        print(f'[{filename}] Extracting iv3_features features: shape:={scene_features_iv3.shape}')
+        # scene_features_iv3 = extract_iv3_features(inception_v3_model,
+        #                                           data_from_window[DatasetFeaturesSet.VIDEO_SCENE_RAW])
+        # print(f'[{filename}] Extracting iv3_features features: shape:={scene_features_iv3.shape}')
 
         features_by_name[DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES] = scene_features_r2
-        features_by_name[DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
+        # features_by_name[DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES] = scene_features_iv3
 
         # Audio
-        preprocessed_audio = _preprocess_audio_batch(data_from_window[DatasetFeaturesSet.AUDIO], 240000)
+        preprocessed_audio = _preprocess_audio_batch(data_from_window[DatasetFeaturesSet.AUDIO], 48000)
         audio_features = extract_l3_features(audio_model, preprocessed_audio)
         print(f'[{filename}] Extracting l3_features features: shape:={audio_features.shape}')
         features_by_name[DatasetFeaturesSet.AUDIO] = audio_features
 
-        audio_features = _extract_opensmile_features(preprocessed_audio, 48000, opensmile.FeatureSet.GeMAPSv01b)
-        features_by_name[DatasetFeaturesSet.OPENSMILE_GeMAPSv01b] = audio_features.astype(np.float32)
-        print(f'[{filename}] Extracting opensmile.FeatureSet.GeMAPSv01b features: shape:={audio_features.shape}')
-
-        audio_features = _extract_opensmile_features(preprocessed_audio, 48000, opensmile.FeatureSet.eGeMAPSv02)
-        features_by_name[DatasetFeaturesSet.OPENSMILE_eGeMAPSv02] = audio_features.astype(np.float32)
-        print(f'[{filename}] Extracting opensmile.FeatureSet.eGeMAPSv02 features: shape:={audio_features.shape}')
+        # audio_features = _extract_opensmile_features(preprocessed_audio, 48000, opensmile.FeatureSet.GeMAPSv01b)
+        # features_by_name[DatasetFeaturesSet.OPENSMILE_GeMAPSv01b] = audio_features.astype(np.float32)
+        # print(f'[{filename}] Extracting opensmile.FeatureSet.GeMAPSv01b features: shape:={audio_features.shape}')
+        #
+        # audio_features = _extract_opensmile_features(preprocessed_audio, 48000, opensmile.FeatureSet.eGeMAPSv02)
+        # features_by_name[DatasetFeaturesSet.OPENSMILE_eGeMAPSv02] = audio_features.astype(np.float32)
+        # print(f'[{filename}] Extracting opensmile.FeatureSet.eGeMAPSv02 features: shape:={audio_features.shape}')
 
         audio_features = _extract_opensmile_features(preprocessed_audio, 48000, opensmile.FeatureSet.ComParE_2016)
         features_by_name[DatasetFeaturesSet.OPENSMILE_ComParE_2016] = audio_features.astype(np.float32)

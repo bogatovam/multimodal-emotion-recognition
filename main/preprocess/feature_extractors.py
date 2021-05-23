@@ -81,7 +81,7 @@ def resize_preprocess(frame):
     return cv2.resize(frame, (112, 112))
 
 
-def _l3_preprocess_audio(audio, sr, hop_size=0.1):
+def _l3_preprocess_audio(audio, sr, hop_size=0.5):
     if audio.size == 0:
         raise RuntimeError('Got empty audio')
 
@@ -137,7 +137,7 @@ def _pad_audio(audio, frame_len, hop_len):
     return audio
 
 
-def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.1, TARGET_SR=48000):
+def _preprocess_audio_batch(audio, sr, center=True, hop_size=0.5, TARGET_SR=48000):
     """Process audio into batch format suitable for input to embedding model """
     if audio.size == 0:
         raise RuntimeError('Got empty audio')

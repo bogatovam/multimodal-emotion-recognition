@@ -8,7 +8,7 @@ from configs.by_device_type.tpu_dir_config import *
 
 PRETRAINED_MODEL_PATH = PRETRAINED_MODELS + "/rplus1"
 
-ANNOTATIONS_FILE = DATASET_PATH + "/annotationsClass.csv"
+ANNOTATIONS_FILE = DATASET_PATH + "/annotations.csv"
 
 MODALITY_TO_DATA: dict = {
     Modality.AUDIO: DATASET_PATH + "/Data/Audio",

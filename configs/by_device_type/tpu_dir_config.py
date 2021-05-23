@@ -7,7 +7,7 @@ TENSORBOARD_DIR = "gs://ramas_tpu/experiments/" + EXP_NAME + "/tb"
 TENSORBOARD_NAME = 'epoch-{}'
 
 DATASET_PATH = "/content/drive/MyDrive/RAMAS"
-DATASET_TF_RECORDS_PATH = "gs://ramas_tpu/tf_records/full"
+DATASET_TF_RECORDS_PATH = "/content/drive/MyDrive/ramas_tpu/tf_records/final"
 
 PRETRAINED_MODELS = "/content/drive/MyDrive/pretrained/"
 
