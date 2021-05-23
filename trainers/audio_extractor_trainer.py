@@ -14,10 +14,12 @@ class SimpleTrainer(BaseTrain):
                  num_epochs: int,
                  num_iter_per_epoch,
                  validation_steps,
+                 dataset_processor,
                  create_dirs_flag=False,
                  initial_epoch=0):
         self._initial_epoch = initial_epoch
         self._learning_rate = lr
+        self._dataset_processor = dataset_processor
         self._board_path = board_path
         self._log_freq = log_freq
         self._num_epochs = num_epochs
@@ -27,8 +29,8 @@ class SimpleTrainer(BaseTrain):
         super(SimpleTrainer, self).__init__(model, data)
 
     def train(self):
-        training_dataset = self.data.build_training_dataset()
-        validation_dataset = self.data.build_validation_dataset()
+        training_dataset = self.data.build_training_dataset(self._dataset_processor)
+        validation_dataset = self.data.build_validation_dataset(self._dataset_processor)
 
         train_model = self.model.get_train_model()
 

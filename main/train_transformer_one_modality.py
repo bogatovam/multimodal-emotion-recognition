@@ -14,9 +14,9 @@ import configs.by_device_type.cpu_config as config
 def main():
     processor = MultimodalDatasetFeaturesProcessor(modalities_list=[DatasetFeaturesSet.SKELETON])
 
-    data_manager = DataManager(dataset_processor=processor,
-                               tf_record_path=config.DATASET_TF_RECORDS_PATH + "/" + config.NAME,
-                               batch_size=config.BATCH_SIZE)
+    data_manager = DataManager(
+        tf_record_path=config.DATASET_TF_RECORDS_PATH + "/" + config.NAME,
+        batch_size=config.BATCH_SIZE)
 
     model = TransformerModel(
         num_layers=2,
@@ -37,6 +37,7 @@ def main():
     _, epoch = model.load()
 
     trainer = SimpleTrainer(
+        dataset_processor=processor,
         model=model,
         data=data_manager,
         board_path=config.TENSORBOARD_DIR,

@@ -8,14 +8,12 @@ from sklearn.model_selection import train_test_split
 class DataManager:
 
     def __init__(self,
-                 dataset_processor: BaseDatasetProcessor,
                  tf_record_path: str,
                  repeat: int = None,
                  batch_size: int = 1,
                  use_cache: bool = True,
                  use_prefetch: bool = True):
         self._tf_record_path = tf_record_path
-        self._dataset_processor = dataset_processor
         self._use_cache = use_cache
         self._batch_size = batch_size
 
@@ -37,19 +35,19 @@ class DataManager:
         self._test_ds = tf.data.TFRecordDataset(self.test_files)
         self._train_ds = tf.data.TFRecordDataset(self.train_files)
 
-    def build_training_dataset(self) -> tf.data.Dataset:
-        return self._preprocess_dataset(self._train_ds)
+    def build_training_dataset(self, dataset_processor) -> tf.data.Dataset:
+        return self._preprocess_dataset(dataset_processor, self._train_ds)
 
-    def build_testing_dataset(self) -> tf.data.Dataset:
-        return self._preprocess_dataset(self._test_ds)
+    def build_testing_dataset(self, dataset_processor) -> tf.data.Dataset:
+        return self._preprocess_dataset(dataset_processor, self._test_ds)
 
-    def build_validation_dataset(self) -> tf.data.Dataset:
-        return self._preprocess_dataset(self._val_ds)
+    def build_validation_dataset(self, dataset_processor) -> tf.data.Dataset:
+        return self._preprocess_dataset(dataset_processor, self._val_ds)
 
-    def _preprocess_dataset(self, ds: tf.data.Dataset, ) -> tf.data.Dataset:
-        ds = self._dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
-        # if self._use_cache:
-        #     ds = ds.cache()
+    def _preprocess_dataset(self, dataset_processor, ds: tf.data.Dataset, ) -> tf.data.Dataset:
+        ds = dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
+        if self._use_cache:
+            ds = ds.cache()
 
         ds = ds.batch(self._batch_size)
         #
