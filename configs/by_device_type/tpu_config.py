@@ -47,18 +47,18 @@ def read_annotations(path):
             target_dataset_length += 1
 
     file_to_annotation_list = list(file_to_annotation.items())
-    filenames = list(map(lambda x: x[0], file_to_annotation_list))
-
-    start_index = filenames.index('15dec_K11_2')
-
-    res = []
-    target_dataset_length = 0
-    for i, file_to_emotions in enumerate(file_to_annotation_list):
-        if i < start_index:
-            continue
-        res.append(file_to_emotions)
-        target_dataset_length += len(file_to_emotions[1])
-    # shuffle(file_to_annotation_list)
+    # filenames = list(map(lambda x: x[0], file_to_annotation_list))
+    #
+    # start_index = filenames.index('15dec_K11_2')
+    #
+    # res = []
+    # target_dataset_length = 0
+    # for i, file_to_emotions in enumerate(file_to_annotation_list):
+    #     if i < start_index:
+    #         continue
+    #     res.append(file_to_emotions)
+    #     target_dataset_length += len(file_to_emotions[1])
+    # # shuffle(file_to_annotation_list)
     return file_to_annotation_list, target_dataset_length
 
 
