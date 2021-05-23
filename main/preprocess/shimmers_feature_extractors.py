@@ -27,7 +27,7 @@ def open_shimmers(filename: str, elements_per_sec=10) -> np.ndarray:
         max_ = df['Timestamp_CAL[sec]'].max()
         grouped = df.groupby(pd.cut(df['Timestamp_CAL[sec]'], np.arange(0, max_ + step, step))).mean().drop(
             'Timestamp_CAL[sec]', axis=1)
-        np_array = grouped.to_numpy()
+        np_array = np.nan_to_num(grouped.to_numpy())
 
         # stand & norm
         np_array = np.array(list(map(stand, np_array)))

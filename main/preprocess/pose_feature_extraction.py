@@ -36,12 +36,12 @@ def open_skeleton(filename: str, elements_per_sec=5) -> np.ndarray:
             df = df.sort_values('Time')
             max_ = df['Time'].max()
             grouped = df.groupby(pd.cut(df['Time'], np.arange(0, max_ + step, step))).mean()
-            np_array = grouped.drop(['Frame', 'Time'], axis=1).to_numpy()
+            np_array = np.nan_to_num(grouped.drop(['Frame', 'Time'], axis=1).to_numpy())
         else:
             df = df.sort_values('Frame')
             max_ = df['Frame'].max()
-            grouped = df.groupby(pd.cut(df['Frame'], np.arange(0, max_ + step, elements_per_sec))).mean()
-            np_array = grouped.drop(['Frame'], axis=1).to_numpy()
+            grouped = df.groupby(pd.cut(df['Frame'], np.arange(0, max_ + step, 1))).mean()
+            np_array = np.nan_to_num(grouped.drop(['Frame'], axis=1).to_numpy())
 
         if np_array.shape[1] < 75:
             delta = 75 - np_array.shape[1]
