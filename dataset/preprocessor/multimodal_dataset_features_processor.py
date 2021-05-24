@@ -12,6 +12,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         self._feature_description = {
             DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
+            DatasetFeaturesSet.OPENSMILE_ComParE_2016.name: tf.io.FixedLenFeature([], tf.string),
             # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
