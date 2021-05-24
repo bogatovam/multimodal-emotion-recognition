@@ -255,7 +255,7 @@ class MultiModelTransformerModel(BaseModel):
         self.model.compile(
             optimizer=self._optimizer(learning_rate=lr, beta_1=0.9,
                                       beta_2=0.98, epsilon=1e-9),
-            loss=tf.keras.losses.MSE()
+            loss=tf.keras.losses.MeanSquaredError()
         )
         return self.model
 

@@ -16,7 +16,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
             # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeaturesSet.AUDIO.name: tf.io.FixedLenFeature([], tf.string),
+            # DatasetFeaturesSet.AUDIO.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SHIMMERS.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SHIMMERS_SHAPE.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SKELETON.name: tf.io.FixedLenFeature([], tf.string),
@@ -25,7 +25,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         }
 
     def pre_process(self, dataset: tf.data.Dataset, parallel_calls: int):
-        dataset = dataset.map(self.map_record_to_dictionary_of_tensors, num_parallel_calls=parallel_calls)
+        # dataset = dataset.map(self.map_record_to_dictionary_of_tensors, num_parallel_calls=parallel_calls)
         if DatasetFeaturesSet.SHIMMERS in self._modalities_list:
             dataset = dataset.filter(self.is_shape_exists)
         if DatasetFeaturesSet.SKELETON in self._modalities_list:
@@ -79,9 +79,9 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         video_scene_iv3_features = tf.io.parse_tensor(video_scene_iv3_features, tf.float32)
         video_scene_iv3_features = tf.cast(video_scene_iv3_features, tf.float32)
 
-        audio = example[DatasetFeaturesSet.AUDIO.name]
-        audio = tf.io.parse_tensor(audio, tf.float32)
-        audio = tf.cast(audio, tf.float32)
+        # audio = example[DatasetFeaturesSet.AUDIO.name]
+        # audio = tf.io.parse_tensor(audio, tf.float32)
+        # audio = tf.cast(audio, tf.float32)
 
         opemsmile = example[DatasetFeaturesSet.OPENSMILE_ComParE_2016.name]
         opemsmile = tf.io.parse_tensor(opemsmile, tf.float32)
@@ -102,7 +102,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: video_scene_r2plus1_features,
             DatasetFeaturesSet.OPENSMILE_ComParE_2016.name: opemsmile,
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: video_scene_iv3_features,
-            DatasetFeaturesSet.AUDIO.name: audio,
+            # DatasetFeaturesSet.AUDIO.name: audio,
             DatasetFeaturesSet.SHIMMERS.name: example[DatasetFeaturesSet.SHIMMERS.name],  # raw
             DatasetFeaturesSet.SHIMMERS_SHAPE.name: shimmers_shape,
             DatasetFeaturesSet.SKELETON.name: example[DatasetFeaturesSet.SKELETON.name],  # raw
