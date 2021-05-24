@@ -24,30 +24,26 @@ class DataManager:
         print("Dataset files: {}".format(files))
         self.PARALLEL_CALLS = tf.data.experimental.AUTOTUNE
 
-        self.train_files, self.test_files = train_test_split(files, test_size=0.3)
-        self.val_files, self.test_files = train_test_split(self.test_files, test_size=0.3)
+        self.train_files, self.val_files = train_test_split(files, test_size=0.3)
 
         print("Train files size: {}".format(len(self.train_files)))
         print("Valid files size: {}".format(len(self.val_files)))
-        print("Test files size: {}".format(len(self.test_files)))
 
         self._val_ds = tf.data.TFRecordDataset(self.val_files)
-        self._test_ds = tf.data.TFRecordDataset(self.test_files)
         self._train_ds = tf.data.TFRecordDataset(self.train_files)
+
+        if self._use_cache:
+            self._val_ds = self._val_ds.cache()
+            self._train_ds = self._train_ds.cache()
 
     def build_training_dataset(self, dataset_processor) -> tf.data.Dataset:
         return self._preprocess_dataset(dataset_processor, self._train_ds)
-
-    def build_testing_dataset(self, dataset_processor) -> tf.data.Dataset:
-        return self._preprocess_dataset(dataset_processor, self._test_ds)
 
     def build_validation_dataset(self, dataset_processor) -> tf.data.Dataset:
         return self._preprocess_dataset(dataset_processor, self._val_ds)
 
     def _preprocess_dataset(self, dataset_processor, ds: tf.data.Dataset, ) -> tf.data.Dataset:
         ds = dataset_processor.pre_process(ds, self.PARALLEL_CALLS)
-        if self._use_cache:
-            ds = ds.cache()
 
         ds = ds.batch(self._batch_size)
         #
