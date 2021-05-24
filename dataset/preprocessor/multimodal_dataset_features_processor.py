@@ -1,5 +1,3 @@
-import sys
-
 import tensorflow as tf
 
 from base.base_dataset_processor import BaseDatasetProcessor
@@ -84,6 +82,11 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         audio = tf.io.parse_tensor(audio, tf.float32)
         audio = tf.cast(audio, tf.float32)
 
+        opemsmile = example[DatasetFeaturesSet.OPENSMILE_ComParE_2016.name]
+        opemsmile = tf.io.parse_tensor(opemsmile, tf.float32)
+        opemsmile = tf.cast(opemsmile, tf.float32)
+        opemsmile = tf.squeeze(opemsmile)
+
         shimmers_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.SHIMMERS_SHAPE.name], tf.int64)
         skeleton_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.SKELETON_SHAPE.name], tf.int64)
 
@@ -96,6 +99,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
             DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: video_face_ir50_features,
             # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: video_face_r2plus1_features,
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: video_scene_r2plus1_features,
+            DatasetFeaturesSet.OPENSMILE_ComParE_2016.name: opemsmile,
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: video_scene_iv3_features,
             DatasetFeaturesSet.AUDIO.name: audio,
             DatasetFeaturesSet.SHIMMERS.name: example[DatasetFeaturesSet.SHIMMERS.name],  # raw

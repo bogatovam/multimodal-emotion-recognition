@@ -95,9 +95,7 @@ class DatasetFeaturesSet(Enum):
         self.config = config
 
     AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(10, 32, 24, 512), input_shape=(10, 393216))
-    OPENSMILE_GeMAPSv01b = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
-    OPENSMILE_eGeMAPSv02 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
-    OPENSMILE_ComParE_2016 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
+    OPENSMILE_ComParE_2016 = TensorEncoder(), FeaturesSetConfig(shape=(10, 1, 6373), input_shape=(10, 6373))
     VIDEO_SCENE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     VIDEO_FACE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     CLASS = TensorEncoder(), FeaturesSetConfig(shape=7)
