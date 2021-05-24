@@ -14,7 +14,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         self._feature_description = {
             DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
+            # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.AUDIO.name: tf.io.FixedLenFeature([], tf.string),
@@ -68,9 +68,9 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         video_face_ir50_features = tf.io.parse_tensor(video_face_ir50_features, tf.float32)
         video_face_ir50_features = tf.cast(video_face_ir50_features, tf.float32)
 
-        video_face_r2plus1_features = example[DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name]
-        video_face_r2plus1_features = tf.io.parse_tensor(video_face_r2plus1_features, tf.float32)
-        video_face_r2plus1_features = tf.cast(video_face_r2plus1_features, tf.float32)
+        # video_face_r2plus1_features = example[DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name]
+        # video_face_r2plus1_features = tf.io.parse_tensor(video_face_r2plus1_features, tf.float32)
+        # video_face_r2plus1_features = tf.cast(video_face_r2plus1_features, tf.float32)
 
         video_scene_r2plus1_features = example[DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name]
         video_scene_r2plus1_features = tf.io.parse_tensor(video_scene_r2plus1_features, tf.float32)
@@ -85,7 +85,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         audio = tf.cast(audio, tf.float32)
 
         shimmers_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.SHIMMERS_SHAPE.name], tf.int64)
-        skeleton_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.SKELETON_SHAPE.name], tf.int32)
+        skeleton_shape = tf.io.parse_tensor(example[DatasetFeaturesSet.SKELETON_SHAPE.name], tf.int64)
 
         clazz = tf.io.parse_tensor(example[DatasetFeaturesSet.CLASS.name], tf.double)
         clazz = tf.cast(clazz, dtype=tf.float32)
@@ -94,7 +94,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         return {
             DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES.name: video_face_vgg_features,
             DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: video_face_ir50_features,
-            DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: video_face_r2plus1_features,
+            # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: video_face_r2plus1_features,
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: video_scene_r2plus1_features,
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: video_scene_iv3_features,
             DatasetFeaturesSet.AUDIO.name: audio,
@@ -115,7 +115,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
                 shimmers = tf.cast(shimmers, tf.float32)
                 tf_features_dict[str(modality.name)] = tf.ensure_shape(shimmers, modality.config.shape)
             elif modality == DatasetFeaturesSet.SKELETON:
-                skeleton = tf.io.parse_tensor(example[str(modality.name)], tf.double)
+                skeleton = tf.io.parse_tensor(example[str(modality.name)], tf.float32)
                 skeleton = tf.cast(skeleton, tf.float32)
                 tf_features_dict[str(modality.name)] = tf.ensure_shape(skeleton, modality.config.shape)
             else:
@@ -124,7 +124,7 @@ class MultimodalDatasetFeaturesProcessor(BaseDatasetProcessor):
         if DatasetFeaturesSet.AUDIO.name in tf_features_dict:
             audio = tf_features_dict[DatasetFeaturesSet.AUDIO.name]
             # fixme (need more generic)
-            tf_features_dict[DatasetFeaturesSet.AUDIO.name] = tf.reshape(audio, shape=(5 * 32, 24 * 512))
+            tf_features_dict[DatasetFeaturesSet.AUDIO.name] = tf.reshape(audio, shape=(10, 393216))
 
         if DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name in tf_features_dict:
             video = tf_features_dict[DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name]

@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 class MultiHeadAttention(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads):
+    def __init__(self, d_model, num_heads, dropout_rate):
         super(MultiHeadAttention, self).__init__()
         self.num_heads = num_heads
         # d_model - output of model
@@ -17,6 +17,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         self.wv = tf.keras.layers.Dense(d_model)
 
         self.dense = tf.keras.layers.Dense(d_model)
+        self.dropout_rate = tf.keras.layers.Dropout(dropout_rate)
 
     def split_heads(self, x, batch_size):
         """Split the last dimension into (num_heads, depth).
@@ -61,7 +62,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
         # softmax is normalized on the last axis (seq_len_k) so that the scores add up to 1.
         attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
-
+        attention_weights = self.dropout_rate(attention_weights)
         output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
 
         return output, attention_weights

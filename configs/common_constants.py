@@ -2,13 +2,13 @@ from configs.dataset.modality import VideoModalityConfig
 
 NAME = "emotion-transformer"
 
-EXP_NAME = "unimodal_ramas"
+EXP_NAME = "multimodal_ramas"
 
 FEATURES_COUNT = 40
 
 SAMPLES_PER_TFRECORD = 128
 
-BATCH_SIZE = 2
+BATCH_SIZE = 128
 
 LOG_AND_SAVE_FREQ_BATCH = 10
 

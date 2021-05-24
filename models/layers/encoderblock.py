@@ -8,7 +8,7 @@ class EncoderLayer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, dff, rate=0.1):
         super(EncoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(d_model, num_heads)
+        self.mha = MultiHeadAttention(d_model, num_heads, rate)
         self.ffn = self.point_wise_feed_forward_network(d_model, dff)
 
         self.layer_norm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)

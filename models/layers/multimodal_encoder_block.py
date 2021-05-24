@@ -9,7 +9,7 @@ class MultimodalEncoderLastLayer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, intermediate_fc_units_count, dropout_rate):
         super(MultimodalEncoderLastLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(d_model, num_heads)
+        self.mha = MultiHeadAttention(d_model, num_heads, dropout_rate)
         self.ffn = self.point_wise_feed_forward_network(d_model, intermediate_fc_units_count)
 
         self.layer_norm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -42,7 +42,7 @@ class MultimodalEncoderLayer(tf.keras.layers.Layer):
     def __init__(self, d_model, num_heads, intermediate_fc_units_count, dropout_rate, soft_attention_output_units):
         super(MultimodalEncoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(d_model, num_heads)
+        self.mha = MultiHeadAttention(d_model, num_heads, dropout_rate)
         self.ffn = self.point_wise_feed_forward_network(d_model, intermediate_fc_units_count)
 
         self.layer_norm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)

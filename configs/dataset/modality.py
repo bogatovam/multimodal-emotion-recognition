@@ -94,7 +94,7 @@ class DatasetFeaturesSet(Enum):
         self.encoder = encoder
         self.config = config
 
-    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
+    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(10, 32, 24, 512), input_shape=(10, 393216))
     OPENSMILE_GeMAPSv01b = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
     OPENSMILE_eGeMAPSv02 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
     OPENSMILE_ComParE_2016 = TensorEncoder(), FeaturesSetConfig(shape=(5, 32, 24, 512), input_shape=(160, 12288))
@@ -107,6 +107,6 @@ class DatasetFeaturesSet(Enum):
     VIDEO_FACE_VGG_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
     VIDEO_FACE_IR50_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
     SKELETON = TensorEncoder(), FeaturesSetConfig(shape=(9, 28))
-    SHIMMERS = TensorEncoder(), FeaturesSetConfig(shape=(50, 18))
+    SHIMMERS = TensorEncoder(), FeaturesSetConfig(shape=(50, 17))
     SHIMMERS_SHAPE = TensorEncoder(), FeaturesSetConfig(shape=0)
     SKELETON_SHAPE = TensorEncoder(), FeaturesSetConfig(shape=0)

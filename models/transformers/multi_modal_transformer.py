@@ -22,9 +22,9 @@ class MultiModelTransformerModel(BaseModel):
                  num_classes,
                  max_features_count,
                  dropout_rate,
-                 weight_decay,
                  cp_dir: str,
                  cp_name: str,
+                 weight_decay=0.000001,
                  co_attention=False,
                  pooling_size=-1,
                  fusion_type='sum',
@@ -36,8 +36,7 @@ class MultiModelTransformerModel(BaseModel):
         self._weight_decay = weight_decay
         self._learning_rate = learning_rate
         self._learning_rate = learning_rate
-
-        self._optimizer = tfa.optimizers.AdamW
+        self._optimizer = tf.keras.optimizers.Adam
 
         self._num_layers = num_layers
         self._d_model = d_model
@@ -175,7 +174,7 @@ class MultiModelTransformerModel(BaseModel):
         return train_model if training else test_model
 
     def _build_multimodal_input(self):
-        return [tf.keras.layers.Input(shape=modality.config.shape) for modality in self._modalities_list]
+        return [tf.keras.layers.Input(shape=modality.config.input_shape) for modality in self._modalities_list]
 
     def _build_usual_transformer_block(self, inputs, training):
         attention_intra_modality_weights = []
