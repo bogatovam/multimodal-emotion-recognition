@@ -67,11 +67,11 @@ class MultimodalEncoderLayer(tf.keras.layers.Layer):
         ffn_output = self.dropout2(ffn_output, training=training)
         out2 = self.layer_norm2(out1 + ffn_output)  # (batch_size, input_seq_len, d_model)
 
-        soft_att_output = self._soft_attention(out2)
-        soft_att_output = self.dropout3(soft_att_output, training=training)
-        out3 = self.layer_norm3(out2 + soft_att_output)  # (batch_size, input_seq_len, d_model)
+        # soft_att_output = self._soft_attention(out2)
+        # soft_att_output = self.dropout3(soft_att_output, training=training)
+        # out3 = self.layer_norm3(out2 + soft_att_output)  # (batch_size, input_seq_len, d_model)
 
-        return out3, attention_weights
+        return out2, attention_weights
 
     def point_wise_feed_forward_network(self, d_model, dff):
         return tf.keras.Sequential([

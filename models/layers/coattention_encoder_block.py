@@ -82,11 +82,11 @@ class CoAttentionEncoderLayer(tf.keras.layers.Layer):
         ffn_output = self.dropout3(ffn_output, training=training)
         out3 = self.layer_norm3(out2 + ffn_output)  # (batch_size, input_seq_len, d_model)
 
-        soft_att_output = self._soft_attention(out3)
-        soft_att_output = self.dropout4(soft_att_output, training=training)
-        out4 = self.layer_norm4(out3 + soft_att_output)  # (batch_size, input_seq_len, d_model)
+        # soft_att_output = self._soft_attention(out3)
+        # soft_att_output = self.dropout4(soft_att_output, training=training)
+        # out4 = self.layer_norm4(out3 + soft_att_output)  # (batch_size, input_seq_len, d_model)
 
-        return out4, attention_weights, attention_weights2
+        return out3, attention_weights, attention_weights2
 
     def point_wise_feed_forward_network(self, d_model, dff):
         return tf.keras.Sequential([

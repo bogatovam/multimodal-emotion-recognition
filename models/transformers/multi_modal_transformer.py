@@ -36,7 +36,7 @@ class MultiModelTransformerModel(BaseModel):
         self._weight_decay = weight_decay
         self._learning_rate = learning_rate
         self._learning_rate = learning_rate
-        self._optimizer = tf.keras.optimizers.Adam
+        self._optimizer = tfa.optimizers.AdamW
 
         self._num_layers = num_layers
         self._d_model = d_model
@@ -89,7 +89,7 @@ class MultiModelTransformerModel(BaseModel):
         inputs = self._build_multimodal_input()
         intra_modality_outputs, attention_intra_modality_weights = self._build_usual_transformer_block(inputs, training)
 
-        fusion_output = ConcatenationFusionLayer()(intra_modality_outputs)
+        fusion_output = ConcatenationFusionLayer(self._d_model, len(self._modalities_list))(intra_modality_outputs)
         print(f'fusion_output.shape:={fusion_output.shape}')
         output_tensor = self._build_classification_layer(fusion_output)
 
@@ -138,7 +138,7 @@ class MultiModelTransformerModel(BaseModel):
         inputs = self._build_multimodal_input()
         intra_modality_outputs, attention_weights = self._build_co_attention_transformer_block(inputs, training)
 
-        fusion_output = ConcatenationFusionLayer()(intra_modality_outputs)
+        fusion_output = ConcatenationFusionLayer(self._d_model, len(self._modalities_list))(intra_modality_outputs)
         print(f'fusion_output.shape:={fusion_output.shape}')
         output_tensor = self._build_classification_layer(fusion_output)
 
@@ -253,7 +253,7 @@ class MultiModelTransformerModel(BaseModel):
         #            tfa.metrics.F1Score(name='f1_micro', num_classes=self._num_classes, average='micro'),
         #            tfa.metrics.F1Score(name='f1_macro', num_classes=self._num_classes, average='macro')]
         self.model.compile(
-            optimizer=self._optimizer(learning_rate=lr, beta_1=0.9,
+            optimizer=self._optimizer(learning_rate=self._learning_rate, weight_decay=0.00001, beta_1=0.9,
                                       beta_2=0.98, epsilon=1e-9),
             loss=tf.keras.losses.MeanSquaredError()
         )
