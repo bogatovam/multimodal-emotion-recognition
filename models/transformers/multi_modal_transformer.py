@@ -250,7 +250,7 @@ class MultiModelTransformerModel(BaseModel):
     def get_train_model(self):
         lr = CustomSchedule(self._d_model)
         # metrics = ['accuracy',
-        #            tfa.metrics.F1Score(name='f1_micro', num_classes=self._num_classes, average='micro'),
+                   tfa.metrics.F1Score(name='f1_micro', num_classes=self._num_classes, average='micro'),
         #            tfa.metrics.F1Score(name='f1_macro', num_classes=self._num_classes, average='macro')]
         self.model.compile(
             optimizer=self._optimizer(learning_rate=self._learning_rate, weight_decay=0.00001, beta_1=0.9,

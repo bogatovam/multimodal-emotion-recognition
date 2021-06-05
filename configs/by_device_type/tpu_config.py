@@ -32,8 +32,7 @@ def read_annotations(path):
     with open(path, newline='') as annotations:
         reader = csv.DictReader(annotations)
         for row in reader:
-            # remove _ann.csv
-            file_name = os.path.splitext(row['file'])[0][:-4]
+            file_name = row['file']
 
             if file_name not in file_to_annotation:
                 file_to_annotation[file_name] = []

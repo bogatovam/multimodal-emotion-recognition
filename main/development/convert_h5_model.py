@@ -91,7 +91,11 @@ def _process_frames(*data):
     print(data)
     # writer.write(_encode_example(_extract_features_from_data(filename, data), emotion.emotions_vector))
 
+
 if __name__ == "__main__":
+    m = tf.keras.models.load_model("D:/2021/hse/multimodal-emotion-recognition/models/pretrained/openl3_audio_mel256_music.h5", custom_objects={
+        'Melspectrogram': Melspectrogram}, compile=False)
+    m.summary()
     # model = create_model_functional()
     # try:
     #     model.load_weights('../models/pretrained/sports1M_weights_tf.h5')
@@ -130,10 +134,10 @@ if __name__ == "__main__":
     # _ = [print('{:.5f} {}'.format(output[0][i], labels[i])) for i in top_inds]
     # print(output)
     # # Show the model architecture
-    import tensorflow_hub as hub
-
-    model = hub.load('https://tfhub.dev/google/yamnet/1')
-    print(model.signatures)
+    # import tensorflow_hub as hub
+    #
+    # model = hub.load('https://tfhub.dev/google/yamnet/1')
+    # print(model.signatures)
     # new_model.trainable = False
     # print(new_model.signatures["serving_default"])
     # predictor = new_model.signatures["serving_default"]
@@ -157,4 +161,3 @@ if __name__ == "__main__":
     # layer_output = model.predict(frames)
 
     # print(intermediate_layer_model.predict(frames).shape)
-
