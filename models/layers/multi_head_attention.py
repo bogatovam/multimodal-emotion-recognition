@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 class MultiHeadAttention(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads, dropout_rate):
+    def __init__(self, regularizer, d_model, num_heads, dropout_rate):
         super(MultiHeadAttention, self).__init__()
         self.num_heads = num_heads
         # d_model - output of model
@@ -12,9 +12,9 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
         self.depth = d_model // self.num_heads
 
-        self.wq = tf.keras.layers.Dense(d_model)
-        self.wk = tf.keras.layers.Dense(d_model)
-        self.wv = tf.keras.layers.Dense(d_model)
+        self.wq = tf.keras.layers.Dense(d_model, activity_regularizer=regularizer)
+        self.wk = tf.keras.layers.Dense(d_model, activity_regularizer=regularizer)
+        self.wv = tf.keras.layers.Dense(d_model, activity_regularizer=regularizer)
 
         self.dense = tf.keras.layers.Dense(d_model)
         self.dropout_rate = tf.keras.layers.Dropout(dropout_rate)

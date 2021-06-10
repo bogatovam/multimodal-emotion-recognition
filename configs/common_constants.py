@@ -2,7 +2,7 @@ from configs.dataset.modality import VideoModalityConfig
 
 NAME = "emotion-transformer"
 
-EXP_NAME = "multimodal_ramas"
+EXP_NAME = "unimodal_reg"
 
 FEATURES_COUNT = 40
 

@@ -94,13 +94,13 @@ class DatasetFeaturesSet(Enum):
         self.encoder = encoder
         self.config = config
 
-    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(10, 32, 24, 512), input_shape=(10, 393216))
+    AUDIO = TensorEncoder(), FeaturesSetConfig(shape=(10, 512), input_shape=(10, 512))
     OPENSMILE_ComParE_2016 = TensorEncoder(), FeaturesSetConfig(shape=(10, 6373), input_shape=(10, 6373))
     VIDEO_SCENE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     VIDEO_FACE_RAW = TensorEncoder(), FeaturesSetConfig(shape=0)
     CLASS = TensorEncoder(), FeaturesSetConfig(shape=7)
-    VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
-    VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(39, 512))
+    VIDEO_FACE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(33, 512))
+    VIDEO_SCENE_R2PLUS1_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(33, 512))
     VIDEO_SCENE_IV3_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 2, 2, 2048), input_shape=(160, 8192))
     VIDEO_FACE_VGG_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))
     VIDEO_FACE_IR50_FEATURES = TensorEncoder(), FeaturesSetConfig(shape=(160, 512))

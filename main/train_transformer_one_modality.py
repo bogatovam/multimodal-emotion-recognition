@@ -4,7 +4,7 @@ from configs.dataset.modality import DatasetFeaturesSet
 from dataset.manager.data_manager import DataManager
 from dataset.preprocessor.multimodal_dataset_features_processor import MultimodalDatasetFeaturesProcessor
 from models.transformers.transformer import TransformerModel
-from trainers.audio_extractor_trainer import SimpleTrainer
+from trainers.simple_trainer import SimpleTrainer
 
 sys.path.insert(0, './')
 

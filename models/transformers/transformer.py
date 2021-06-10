@@ -1,14 +1,59 @@
 from base.base_model import BaseModel
 import tensorflow as tf
 from models.layers.encoderblock import EncoderBlock
-import tensorflow_addons as tfa
 
 from models.layers.soft_attention import SoftAttention
+import tensorflow_addons as tfa
+
+
+class F1Micro(tfa.metrics.F1Score):
+
+    def __init__(self, threshold=0.2, **kwargs):
+        super(F1Micro, self).__init__(name='f1_micro', threshold=threshold, num_classes=7, average='micro', **kwargs)
+        self.threshold = threshold
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = tf.cast(y_true, tf.float32)
+        y_true = y_true > self.threshold
+        super(F1Micro, self).update_state(y_true, y_pred)
+
+
+class F1Macro(tfa.metrics.F1Score):
+
+    def __init__(self, threshold=0.2, **kwargs):
+        super(F1Macro, self).__init__(name='f1_macro', threshold=threshold, num_classes=7, average='macro', **kwargs)
+        self.threshold = threshold
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = tf.cast(y_true, tf.float32)
+        y_true = y_true > self.threshold
+        super(F1Macro, self).update_state(y_true, y_pred)
+
+
+class Accuracy(tf.keras.metrics.Metric):
+
+    def __init__(self, name='accuracy_threshold', threshold=0.2, **kwargs):
+        super(Accuracy, self).__init__(name=name, **kwargs)
+
+        self.threshold = threshold
+        self.m = tf.keras.metrics.Accuracy()
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = tf.cast((y_true > self.threshold), tf.float32)
+        y_pred = tf.cast((y_pred > self.threshold), tf.float32)
+
+        self.m.update_state(y_true, y_pred)
+
+    def result(self):
+        return self.m.result()
 
 
 class TransformerModel(BaseModel):
 
     def __init__(self,
+                 activation,
+                 optimizer,
+                 regularizer,
                  num_layers,
                  d_model,
                  num_heads,
@@ -27,8 +72,10 @@ class TransformerModel(BaseModel):
                  iter_per_epoch=390):
         self._weight_decay = weight_decay
         self._learning_rate = learning_rate
+        self._regularizer = regularizer
+        self._activation = activation
 
-        self._optimizer = tf.keras.optimizers.Adam
+        self._optimizer = optimizer
 
         self._input_shape = input_shape
         self._features_len = input_shape[0]
@@ -52,19 +99,22 @@ class TransformerModel(BaseModel):
 
     def _build_model(self, training=True) -> tf.keras.Model:
         input_tensor = tf.keras.layers.Input(shape=self._input_shape)
-        self.encoders_block = EncoderBlock(num_layers=self._num_layers,
-                                           d_model=self._d_model,
-                                           num_heads=self._num_heads,
-                                           dropout_rate=self._dropout_rate,
-                                           max_features_count=self._max_features_count,
-                                           intermediate_fc_units_count=self._intermediate_fc_units_count)
+        self.encoders_block = EncoderBlock(
+            activation=self._activation,
+            regularizer=self._regularizer,
+            num_layers=self._num_layers,
+            d_model=self._d_model,
+            num_heads=self._num_heads,
+            dropout_rate=self._dropout_rate,
+            max_features_count=self._max_features_count,
+            intermediate_fc_units_count=self._intermediate_fc_units_count)
 
         # enc_padding_mask = self.create_padding_mask(input_tensor)
         # (batch_size, features_len, d_model)
         encoder_output, attention_weights = self.encoders_block(input_tensor, training=training)
-        # print(encoder_output.shape) (seq_len, d_model)
-        block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
-        # print(block_output.shape) (self._soft_attention_output_units, d_model)
+        block_output = SoftAttention(self._regularizer, self._activation, self._intermediate_fc_units_count,
+                                     self._dropout_rate)(
+            encoder_output)
         flatten_output = tf.keras.layers.Flatten()(block_output)
         output_tensor = tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(flatten_output)
         train_model = tf.keras.Model(inputs=input_tensor, outputs=output_tensor)
@@ -72,13 +122,18 @@ class TransformerModel(BaseModel):
         return train_model if training else test_model
 
     def get_train_model(self):
-        lr = CustomSchedule(self._d_model)
-        metrics = ['accuracy',
-                   tfa.metrics.F1Score(name='f1_micro', num_classes=self._num_classes, average='micro'),
-                   tfa.metrics.F1Score(name='f1_macro', num_classes=self._num_classes, average='macro')]
+        metrics = [Accuracy(threshold=0.4), F1Micro(threshold=0.4), F1Macro(threshold=0.4)]
+
+        optimizer = None
+        if self._optimizer.__name__ == 'Adam':
+            optimizer = self._optimizer(learning_rate=self._learning_rate, beta_1=0.9,
+                                        beta_2=0.98, epsilon=1e-9)
+        else:
+            optimizer = self._optimizer(learning_rate=self._learning_rate, beta_1=0.9,
+                                        beta_2=0.98, epsilon=1e-9, weight_decay=self._weight_decay)
+
         self.model.compile(
-            optimizer=self._optimizer(learning_rate=lr, beta_1=0.9,
-                                      beta_2=0.98, epsilon=1e-9),
+            optimizer=optimizer,
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=metrics
         )

@@ -25,7 +25,7 @@ class DataManager:
         print("Dataset files: {}".format(files))
         self.PARALLEL_CALLS = tf.data.experimental.AUTOTUNE
 
-        self.train_files, self.val_files = train_test_split(files, test_size=0.3)
+        self.train_files, self.val_files = files, files
 
         print("Train files size: {}".format(len(self.train_files)))
         print("Valid files size: {}".format(len(self.val_files)))
@@ -35,12 +35,11 @@ class DataManager:
 
         self._feature_description = {
             DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
-            DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.OPENSMILE_ComParE_2016.name: tf.io.FixedLenFeature([], tf.string),
-            # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
+            DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: tf.io.FixedLenFeature([], tf.string),
-            # DatasetFeaturesSet.AUDIO.name: tf.io.FixedLenFeature([], tf.string),
+            DatasetFeaturesSet.AUDIO.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SHIMMERS.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SHIMMERS_SHAPE.name: tf.io.FixedLenFeature([], tf.string),
             DatasetFeaturesSet.SKELETON.name: tf.io.FixedLenFeature([], tf.string),
@@ -93,13 +92,9 @@ class DataManager:
         video_face_vgg_features = tf.io.parse_tensor(video_face_vgg_features, tf.float32)
         video_face_vgg_features = tf.cast(video_face_vgg_features, tf.float32)
 
-        video_face_ir50_features = example[DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name]
-        video_face_ir50_features = tf.io.parse_tensor(video_face_ir50_features, tf.float32)
-        video_face_ir50_features = tf.cast(video_face_ir50_features, tf.float32)
-
-        # video_face_r2plus1_features = example[DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name]
-        # video_face_r2plus1_features = tf.io.parse_tensor(video_face_r2plus1_features, tf.float32)
-        # video_face_r2plus1_features = tf.cast(video_face_r2plus1_features, tf.float32)
+        video_face_r2plus1_features = example[DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name]
+        video_face_r2plus1_features = tf.io.parse_tensor(video_face_r2plus1_features, tf.float32)
+        video_face_r2plus1_features = tf.cast(video_face_r2plus1_features, tf.float32)
 
         video_scene_r2plus1_features = example[DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name]
         video_scene_r2plus1_features = tf.io.parse_tensor(video_scene_r2plus1_features, tf.float32)
@@ -109,9 +104,9 @@ class DataManager:
         video_scene_iv3_features = tf.io.parse_tensor(video_scene_iv3_features, tf.float32)
         video_scene_iv3_features = tf.cast(video_scene_iv3_features, tf.float32)
 
-        # audio = example[DatasetFeaturesSet.AUDIO.name]
-        # audio = tf.io.parse_tensor(audio, tf.float32)
-        # audio = tf.cast(audio, tf.float32)
+        audio = example[DatasetFeaturesSet.AUDIO.name]
+        audio = tf.io.parse_tensor(audio, tf.float32)
+        audio = tf.cast(audio, tf.float32)
 
         opemsmile = example[DatasetFeaturesSet.OPENSMILE_ComParE_2016.name]
         opemsmile = tf.io.parse_tensor(opemsmile, tf.float32)
@@ -127,12 +122,11 @@ class DataManager:
 
         return {
             DatasetFeaturesSet.VIDEO_FACE_VGG_FEATURES.name: video_face_vgg_features,
-            DatasetFeaturesSet.VIDEO_FACE_IR50_FEATURES.name: video_face_ir50_features,
-            # DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: video_face_r2plus1_features,
+            DatasetFeaturesSet.VIDEO_FACE_R2PLUS1_FEATURES.name: video_face_r2plus1_features,
             DatasetFeaturesSet.VIDEO_SCENE_R2PLUS1_FEATURES.name: video_scene_r2plus1_features,
             DatasetFeaturesSet.OPENSMILE_ComParE_2016.name: opemsmile,
             DatasetFeaturesSet.VIDEO_SCENE_IV3_FEATURES.name: video_scene_iv3_features,
-            # DatasetFeaturesSet.AUDIO.name: audio,
+            DatasetFeaturesSet.AUDIO.name: audio,
             DatasetFeaturesSet.SHIMMERS.name: example[DatasetFeaturesSet.SHIMMERS.name],  # raw
             DatasetFeaturesSet.SHIMMERS_SHAPE.name: shimmers_shape,
             DatasetFeaturesSet.SKELETON.name: example[DatasetFeaturesSet.SKELETON.name],  # raw

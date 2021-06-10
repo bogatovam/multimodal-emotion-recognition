@@ -61,4 +61,4 @@ def read_annotations(path):
     return res, target_dataset_length
 
 
-ANNOTATIONS, TARGET_DATASET_LENGTH = read_annotations(ANNOTATIONS_FILE)
+# ANNOTATIONS, TARGET_DATASET_LENGTH = read_annotations(ANNOTATIONS_FILE)
