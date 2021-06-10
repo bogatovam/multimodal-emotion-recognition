@@ -7,7 +7,7 @@ class SoftAttention(tf.keras.layers.Layer):
                  soft_attention_output_units=1):
         self._soft_attention_output_units = soft_attention_output_units
         self.mlp = tf.keras.Sequential([
-            tf.keras.layers.Dense(intermediate_fc_units_count, activation=activation, regularizer=regularizer),
+            tf.keras.layers.Dense(intermediate_fc_units_count, activation=activation, activity_regularizer=regularizer),
             # (batch_size, seq_len, dff)
             tf.keras.layers.Dropout(dropout_rate),  # (batch_size, seq_len, d_model)
             tf.keras.layers.Dense(soft_attention_output_units, lambda x: softmax(x, axis=1)),
