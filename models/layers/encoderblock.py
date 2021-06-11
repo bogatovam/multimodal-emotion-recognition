@@ -8,7 +8,7 @@ class EncoderLayer(tf.keras.layers.Layer):
     def __init__(self, regularizer, activation, d_model, num_heads, dff, rate=0.1):
         super(EncoderLayer, self).__init__()
 
-        self.mha = MultiHeadAttention(regularizer, d_model, num_heads, rate)
+        self.mha = MultiHeadAttention(d_model, num_heads, rate)
         self.ffn = self.point_wise_feed_forward_network(regularizer, activation, d_model, dff)
 
         self.layer_norm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -33,8 +33,8 @@ class EncoderLayer(tf.keras.layers.Layer):
 
     def point_wise_feed_forward_network(self, regularizer, activation, d_model, dff):
         return tf.keras.Sequential([
-            tf.keras.layers.Dense(dff, activation=activation, kernel_regularizer=regularizer,
-                                  activity_regularizer=regularizer),  # (batch_size, seq_len, dff)
+            tf.keras.layers.Dense(dff, activation=activation, activity_regularizer=regularizer),
+            # (batch_size, seq_len, dff)
             tf.keras.layers.Dense(d_model)  # (batch_size, seq_len, d_model)
         ])
 
