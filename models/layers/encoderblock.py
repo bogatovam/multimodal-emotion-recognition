@@ -33,7 +33,7 @@ class EncoderLayer(tf.keras.layers.Layer):
 
     def point_wise_feed_forward_network(self, regularizer, activation, d_model, dff):
         return tf.keras.Sequential([
-            tf.keras.layers.Dense(dff, activation=activation, activity_regularizer=regularizer),
+            tf.keras.layers.Dense(dff, activation=activation),
             # (batch_size, seq_len, dff)
             tf.keras.layers.Dense(d_model)  # (batch_size, seq_len, d_model)
         ])
