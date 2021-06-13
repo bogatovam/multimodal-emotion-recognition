@@ -5,11 +5,11 @@ from models.layers.multi_head_attention import MultiHeadAttention
 
 
 class EncoderLayer(tf.keras.layers.Layer):
-    def __init__(self, regularizer, activation, d_model, num_heads, dff, rate=0.1):
+    def __init__(self, d_model, num_heads, dff, rate=0.1):
         super(EncoderLayer, self).__init__()
 
         self.mha = MultiHeadAttention(d_model, num_heads, rate)
-        self.ffn = self.point_wise_feed_forward_network(regularizer, activation, d_model, dff)
+        self.ffn = self.point_wise_feed_forward_network(d_model, dff)
 
         self.layer_norm1 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
         self.layer_norm2 = tf.keras.layers.LayerNormalization(epsilon=1e-6)
@@ -31,16 +31,16 @@ class EncoderLayer(tf.keras.layers.Layer):
 
         return out2, attention_weights
 
-    def point_wise_feed_forward_network(self, regularizer, activation, d_model, dff):
+    def point_wise_feed_forward_network(self, d_model, dff):
         return tf.keras.Sequential([
-            tf.keras.layers.Dense(dff, activation=activation),
+            tf.keras.layers.Dense(dff, activation='relu'),
             # (batch_size, seq_len, dff)
             tf.keras.layers.Dense(d_model)  # (batch_size, seq_len, d_model)
         ])
 
 
 class EncoderBlock(tf.keras.layers.Layer):
-    def __init__(self, activation, regularizer, num_layers, d_model, num_heads, intermediate_fc_units_count,
+    def __init__(self, num_layers, d_model, num_heads, intermediate_fc_units_count,
                  max_features_count,
                  dropout_rate=0.1):
         super(EncoderBlock, self).__init__()
@@ -53,7 +53,7 @@ class EncoderBlock(tf.keras.layers.Layer):
                                                      self.d_model)
 
         self.enc_layers = [
-            EncoderLayer(regularizer, activation, d_model, num_heads, intermediate_fc_units_count, dropout_rate)
+            EncoderLayer(d_model, num_heads, intermediate_fc_units_count, dropout_rate)
             for _ in range(num_layers)]
 
         self.dropout = tf.keras.layers.Dropout(dropout_rate)

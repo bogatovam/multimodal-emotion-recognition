@@ -1,6 +1,6 @@
 from base.base_model import BaseModel
 import tensorflow as tf
-from models.layers.encoderblock import EncoderBlock
+from models.layers.encoder_block import EncoderBlock
 
 from models.layers.soft_attention import SoftAttention
 import tensorflow_addons as tfa

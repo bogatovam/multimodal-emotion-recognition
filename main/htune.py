@@ -48,7 +48,7 @@ def train_and_validate_model(board_path, cp_path, hyper_params: dict, config) ->
         data=data_manager,
         board_path=board_path,
         log_freq=config.LOG_AND_SAVE_FREQ_BATCH,
-        num_epochs=1,
+        num_epochs=10,
         initial_epoch=epoch,
         num_iter_per_epoch=config.NUM_ITER_PER_EPOCH,
         validation_steps=config.VALIDATION_STEPS,
@@ -79,7 +79,7 @@ def run_experiment(run_dir, cp_dir, hyper_params):
 
 
 def main():
-    with strategy.scope():
+    # with strategy.scope():
         session_num: int = 0
         initial_run = 0
 

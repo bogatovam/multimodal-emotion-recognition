@@ -4,6 +4,7 @@ from moviepy.editor import VideoFileClip, vfx
 import tensorflow as tf
 import librosa as lb
 import soundfile
+from keras_vggface import VGGFace
 
 if __name__ == '__main__':
     # path = "E:/RAMAS/RAMAS/Data/r2plus1d_34_clip32_ft_kinetics_from_ig65m-10f4c3bf"
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     #     # loading face gfg
     #     clip = VideoFileClip(path + "/" + f)
     #     # # rotating clip by 180 degree
-    #     out = clip.fx(vfx.mirror_y)
+    #     out = clip.fx(vfx.mirror_y)a
     #     out.write_videofile(rpath + "/" + f)
 
     # pretrained_model_path = '../models/pretrained/r2plus1d_34_clip32_ft_kinetics_from_ig65m-10f4c3bf'

@@ -77,9 +77,22 @@ class TensorEncoder(ByteEncoder):
         return super().transform(feature)
 
 
+class ModelConfig:
+    def __init__(self, d_model, num_layers, num_heads, intermediate_fc_units_count, dropout_rate):
+        self.d_model = d_model
+        self.num_layers = num_layers
+        self.num_heads = num_heads
+        self.intermediate_fc_units_count = intermediate_fc_units_count
+        self.dropout_rate = dropout_rate
+
+
+AUDIO_MODEL_CONFIG = ModelConfig()
+
+
 class FeaturesSetConfig:
-    def __init__(self, shape, input_shape=None):
+    def __init__(self, shape, model_config, input_shape=None):
         self.shape = shape
+        self.model_config = model_config
         self.input_shape = input_shape if input_shape is not None else shape
 
 
