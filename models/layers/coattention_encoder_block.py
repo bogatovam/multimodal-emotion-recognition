@@ -80,7 +80,7 @@ class CoAttentionEncoderBlock(tf.keras.layers.Layer):
             attention_weights[f'encoder_layer{i + 1}_block1'] = attention1
             attention_weights[f'encoder_layer{i + 1}_block1_mm'] = attention2
 
-        x += projection
+        # x += projection
         return x, attention_weights  # (batch_size, input_seq_len, d_model)
 
     def positional_encoding(self, position, d_model):

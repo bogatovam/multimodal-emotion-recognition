@@ -73,7 +73,7 @@ class EncoderBlock(tf.keras.layers.Layer):
         for i in range(self.num_layers):
             x, attention = self.enc_layers[i](x, training, mask)
             attention_weights[f'encoder_layer{i + 1}_block1'] = attention
-        x += projection
+        # x += projection
         return x, attention_weights  # (batch_size, input_seq_len, d_model)
 
     def positional_encoding(self, position, d_model):
