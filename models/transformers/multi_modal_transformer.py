@@ -116,7 +116,9 @@ class MultiModelTransformerModel(BaseModel):
 
         fusion_output, _ = EncoderBlock(d_model=self._d_model,
                                         num_heads=self._num_heads,
+                                        num_layers=self._num_layers,
                                         dropout_rate=self._dropout_rate,
+                                        max_features_count=self._max_features_count,
                                         intermediate_fc_units_count=self._intermediate_fc_units_count)(
             intra_modality_outputs, training, None)
         flatten_output = tf.keras.layers.Flatten()(fusion_output)
@@ -168,8 +170,8 @@ class MultiModelTransformerModel(BaseModel):
                                         num_layers=self._num_layers,
                                         dropout_rate=self._dropout_rate,
                                         max_features_count=self._max_features_count,
-                                        intermediate_fc_units_count=self._intermediate_fc_units_count) \
-            (intra_modality_outputs, training, None)
+                                        intermediate_fc_units_count=self._intermediate_fc_units_count)(
+            intra_modality_outputs, training, None)
 
         flatten_output = tf.keras.layers.Flatten()(fusion_output)
         output_tensor = self._build_classification_layer(flatten_output)
