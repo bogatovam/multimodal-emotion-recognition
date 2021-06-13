@@ -108,7 +108,7 @@ SHIMMERS_MODEL_CONFIG = ModelConfig(d_model=256, num_layers=2, num_heads=8,
                                     dropout_rate=0.15)
 
 class FeaturesSetConfig:
-    def __init__(self, shape, model_config, input_shape=None):
+    def __init__(self, shape, model_config=None, input_shape=None):
         self.shape = shape
         self.model_config = model_config
         self.input_shape = input_shape if input_shape is not None else shape
