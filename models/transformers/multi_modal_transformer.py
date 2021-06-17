@@ -11,6 +11,16 @@ import tensorflow_addons as tfa
 
 from models.layers.soft_attention import SoftAttention
 from models.transformers.transformer import Accuracy, F1Micro, F1Macro
+from base.base_model import BaseModel
+import tensorflow as tf
+
+from configs.dataset.modality import ModelConfig
+from models.layers.coattention_encoder_block import CoAttentionEncoderBlock
+from models.layers.encoder_block import EncoderBlock
+from models.layers.fusion.fbr_fusion_layer import FactorizedPoolingFusionLayer
+import tensorflow_addons as tfa
+
+from models.layers.soft_attention import SoftAttention
 
 
 class MultiModelTransformerModel(BaseModel):
@@ -22,6 +32,7 @@ class MultiModelTransformerModel(BaseModel):
                  num_heads,
                  intermediate_fc_units_count,
                  num_classes,
+                 optimizer,
                  max_features_count,
                  dropout_rate,
                  cp_dir: str,
@@ -38,7 +49,7 @@ class MultiModelTransformerModel(BaseModel):
         self._weight_decay = weight_decay
         self._learning_rate = learning_rate
         self._learning_rate = learning_rate
-        self._optimizer = tfa.optimizers.AdamW
+        self._optimizer = optimizer
 
         self._num_layers = num_layers
         self._d_model = d_model
@@ -236,7 +247,7 @@ class MultiModelTransformerModel(BaseModel):
                                       max_features_count=self._max_features_count)
 
         encoder_output, attention_weights = encoders_block(input_, training=training)
-        encoder_output = encoder_output + input_
+        block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate, input_.shape[1])(encoder_output)
         block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
         return block_output, attention_weights
 
@@ -252,12 +263,17 @@ class MultiModelTransformerModel(BaseModel):
         encoder_output, attention_weights = encoders_block(input_curr,
                                                            input_prev,
                                                            training=training)
-        encoder_output = encoder_output + input_curr
+        block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate, input_curr.shape[1])(encoder_output)
         block_output = SoftAttention(self._intermediate_fc_units_count, self._dropout_rate)(encoder_output)
+        print(block_output.shape)
         return block_output, attention_weights
 
     def _build_classification_layer(self, features):
         features = tf.keras.layers.Dense(units=self._intermediate_fc_units_count, activation='relu')(features)
+        features = tf.keras.layers.Dropout(0.1)(features)
+        features = tf.keras.layers.Dense(units=self._intermediate_fc_units_count // 2, activation='relu')(features)
+        features = tf.keras.layers.Dropout(0.1)(features)
+        features = tf.keras.layers.Dense(units=self._intermediate_fc_units_count // 4, activation='relu')(features)
         return tf.keras.layers.Dense(units=self._num_classes, activation='sigmoid')(features)
 
     def get_train_model(self):
@@ -279,14 +295,14 @@ class MultiModelTransformerModel(BaseModel):
         return self.model
 
     def _merge_with_global_params(self, modality_config: ModelConfig) -> ModelConfig:
-        if modality_config.d_model is None:
-            modality_config.d_model = self._d_model
-        if modality_config.num_heads is None:
-            modality_config.num_heads = self._num_heads
+        # if modality_config.d_model is None:
+        modality_config.d_model = self._d_model
+        # if modality_config.num_heads is None:
+        modality_config.num_heads = self._num_heads
         if modality_config.intermediate_fc_units_count is None:
-            modality_config.intermediate_fc_units_count = self._intermediate_fc_units_count
+          modality_config.intermediate_fc_units_count = self._intermediate_fc_units_count
         if modality_config.dropout_rate is None:
-            modality_config.dropout_rate = self._dropout_rate
-        if modality_config.num_layers is None:
-            modality_config.num_layers = self._num_layers
+          modality_config.dropout_rate = self._dropout_rate
+        # if modality_config.num_layers is None:
+        modality_config.num_layers = self._num_layers
         return modality_config
